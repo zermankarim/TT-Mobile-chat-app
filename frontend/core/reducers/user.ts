@@ -2,8 +2,8 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IUserState } from "../../shared/types";
 
 const initialState: IUserState = {
-  email: "Karim",
-  password: "Zerman",
+  email: "",
+  password: "",
 };
 
 const userSlice = createSlice({
