@@ -12,11 +12,13 @@ import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../core/store/store";
 import { loginUser } from "../core/reducers/user";
 import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../core/firebase/firebase";
+import { auth, database } from "../core/firebase/firebase";
 import { RouteProps } from "../shared/types";
+import { palette } from "../shared/palette";
+import { getDatabase, ref, child, get } from "firebase/database";
+import { collection, getDocs, query, where } from "firebase/firestore";
 
 const Login: FC<RouteProps> = ({ navigation }) => {
-  const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
   const [email, setEmail] = useState<string | null>(null);
@@ -50,25 +52,26 @@ const Login: FC<RouteProps> = ({ navigation }) => {
     setPassword(e.nativeEvent.text);
   };
 
-  // const handleLoginBtnPress = () => {
-  //   if (!email || !password) {
-  //     if (!email) {
-  //       setShowEmailError(true);
-  //     }
-  //     if (!password) {
-  //       setShowPasswordError(true);
-  //     }
-  //     return;
-  //   }
-
-  //   dispatch(loginUser({ email, password }));
-  // };
-
-  const onHandleLogin = () => {
+  const onHandleLogin = async () => {
     if (email && password && email !== "" && password !== "") {
-      signInWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Login success!"))
-        .catch((err) => Alert.alert("Login error", err.message));
+      const q = query(
+        collection(database, "users"),
+        where("email", "==", email) && where("password", "==", password)
+      );
+
+      try {
+        const querySnapshot = await getDocs(q);
+
+        if (querySnapshot.empty) {
+          Alert.alert("Wrong email or password.");
+          return;
+        } else {
+          dispatch(loginUser({ email, password }));
+          console.log("Success Login!");
+        }
+      } catch (error: any) {
+        Alert.alert("Error dureng finding user: ", error.message);
+      }
     }
   };
 
@@ -77,7 +80,7 @@ const Login: FC<RouteProps> = ({ navigation }) => {
       style={{
         flex: 1,
         justifyContent: "center",
-        backgroundColor: "#1f1e26",
+        backgroundColor: palette.dark[700],
         alignItems: "center",
         padding: 10,
       }}
@@ -126,15 +129,10 @@ const Login: FC<RouteProps> = ({ navigation }) => {
       <Button
         title="Log in"
         onPress={onHandleLogin}
-        // onPress={() => {
-        //   dispatch(decrement());
-        //   console.log(count);
-        // }}
-        // disabled={true}
         loading={false}
         loadingProps={{ size: "small", color: "white" }}
         buttonStyle={{
-          backgroundColor: "#6f87ca",
+          backgroundColor: palette.blue[200],
           borderRadius: 5,
           width: "100%",
         }}
@@ -166,7 +164,7 @@ const Login: FC<RouteProps> = ({ navigation }) => {
         <Text
           onPress={() => navigation.navigate("SignUp")}
           style={{
-            color: "#3576ee",
+            color: palette.blue[300],
           }}
         >
           Sign Up
