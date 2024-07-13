@@ -1,24 +1,26 @@
 import {
   Alert,
   NativeSyntheticEvent,
-  StyleSheet,
   Text,
   TextInputChangeEventData,
   View,
 } from "react-native";
 import { FC, SetStateAction, useState } from "react";
 import { Button, Input } from "@rneui/base";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../core/store/store";
+import { useDispatch } from "react-redux";
 import { loginUser } from "../core/reducers/user";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../core/firebase/firebase";
-import { RouteProps } from "../shared/types";
+import { auth, database } from "../core/firebase/firebase";
+import { IUserState, RouteProps } from "../shared/types";
+import { palette } from "../shared/palette";
+import { getDatabase, push, ref, set } from "firebase/database";
+import { addDoc, collection, getDocs, query, where } from "firebase/firestore";
 
 const SignUp: FC<RouteProps> = ({ navigation }) => {
-  const user = useSelector((state: RootState) => state.user);
+  // Redux dispatch
   const dispatch = useDispatch();
 
+  // States
   const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const [showEmailError, setShowEmailError] =
@@ -26,6 +28,7 @@ const SignUp: FC<RouteProps> = ({ navigation }) => {
   const [showPasswordError, setShowPasswordError] =
     useState<SetStateAction<boolean>>(false);
 
+  // Functions
   const handleLoginChange = (
     e: NativeSyntheticEvent<TextInputChangeEventData>
   ) => {
@@ -50,30 +53,38 @@ const SignUp: FC<RouteProps> = ({ navigation }) => {
     setPassword(e.nativeEvent.text);
   };
 
-  //   const handleLoginBtnPress = () => {
-  //     if (!email || !password) {
-  //       if (!email) {
-  //         setShowEmailError(true);
-  //       }
-  //       if (!password) {
-  //         setShowPasswordError(true);
-  //       }
-  //       return;
-  //     }
-
-  //     dispatch(loginUser({ email, password }));
-  //   };
-
-  const onHandleSignUp = () => {
+  const onHandleSignUp = async () => {
     if (email && password && email !== "" && password !== "") {
-      createUserWithEmailAndPassword(auth, email, password)
-        .then(() => console.log("Login success!"))
-        .catch((err) => Alert.alert("Login error", err.message));
+      const q = query(
+        collection(database, "users"),
+        where("email", "==", email)
+      );
+
+      try {
+        const querySnapshot = await getDocs(q);
+
+        if (!querySnapshot.empty) {
+          querySnapshot.forEach((doc) => {
+            Alert.alert("User already registered!");
+          });
+          return;
+        } else {
+          const newUser: IUserState = {
+            email,
+            password,
+          };
+          await addDoc(collection(database, "users"), newUser);
+          dispatch(loginUser({ email, password }));
+          console.log("Success SignUp!");
+        }
+      } catch (error: any) {
+        Alert.alert("Error dureng finding user: ", error.message);
+      }
     }
   };
 
   return (
-    <View
+    <View // Container for SignUp page
       style={{
         flex: 1,
         justifyContent: "center",
@@ -123,17 +134,12 @@ const SignUp: FC<RouteProps> = ({ navigation }) => {
         ></Input>
       </View>
       <Button
-        title="Log in"
+        title="Sign Up"
         onPress={onHandleSignUp}
-        // onPress={() => {
-        //   dispatch(decrement());
-        //   console.log(count);
-        // }}
-        // disabled={true}
         loading={false}
         loadingProps={{ size: "small", color: "white" }}
         buttonStyle={{
-          backgroundColor: "#6f87ca",
+          backgroundColor: palette.blue[200],
           borderRadius: 5,
           width: "100%",
         }}
@@ -160,12 +166,12 @@ const SignUp: FC<RouteProps> = ({ navigation }) => {
             color: "white",
           }}
         >
-          Don't have an account?
+          Already have an account?
         </Text>
         <Text
           onPress={() => navigation.navigate("Login")}
           style={{
-            color: "#3576ee",
+            color: palette.blue[300],
           }}
         >
           Log In
