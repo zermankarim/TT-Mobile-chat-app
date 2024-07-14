@@ -15,6 +15,7 @@ import {
   IButtonsList,
   IChat,
   IUserState,
+  ProfileScreenNavigationProp,
   RootStackParamList,
 } from "./shared/types";
 import Chat from "./static/Chat";
@@ -23,6 +24,7 @@ import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomSheetComponent from "./shared/components/BottomSheet";
 import CreateChat from "./static/CreateChat";
+import Profile from "./static/Profile";
 
 const styles = StyleSheet.create({
   container: {
@@ -34,7 +36,9 @@ const styles = StyleSheet.create({
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 const RootNavigation: FC = () => {
-  const navigation = useNavigation<CreateChatScreenNavigationProp>();
+  const navigation = useNavigation<
+    CreateChatScreenNavigationProp | ProfileScreenNavigationProp
+  >();
   // Redux states and dispatch
   const user: IUserState = useSelector((state: RootState) => state.user);
   const { senderEmail, recipientEmail }: IChat = useSelector(
@@ -55,7 +59,7 @@ const RootNavigation: FC = () => {
   };
 
   // Buttons for menu
-  const buttonsList: IButtonsList[] = [
+  const homeButtonsList: IButtonsList[] = [
     {
       title: "My profile",
       icon: (
@@ -65,7 +69,7 @@ const RootNavigation: FC = () => {
           color={palette.light[600]}
         />
       ),
-      onPress: () => navigation.navigate("CreateChat"),
+      onPress: () => navigation.navigate("Profile"),
     },
     {
       title: "Create a new chat",
@@ -83,10 +87,29 @@ const RootNavigation: FC = () => {
       ),
       onPress: () => handleLogoutBtnPress(),
     },
+  ];
+  const profileButtonsList: IButtonsList[] = [
     {
-      title: "Cancel",
-      icon: null,
-      onPress: () => {},
+      title: "Edit profile",
+      icon: (
+        <FontAwesome
+          name="user-circle-o"
+          size={24}
+          color={palette.light[600]}
+        />
+      ),
+      onPress: () => console.log("edit"),
+    },
+    {
+      title: "Log Out",
+      icon: (
+        <MaterialCommunityIcons
+          name="logout"
+          size={24}
+          color={palette.light[800]}
+        />
+      ),
+      onPress: () => handleLogoutBtnPress(),
     },
   ];
   return (
@@ -100,12 +123,13 @@ const RootNavigation: FC = () => {
             component={Home}
             options={{
               headerStyle: {
-                backgroundColor: palette.dark[1000],
+                backgroundColor: palette.dark[700],
               },
               headerTitleStyle: { color: "white" },
               headerRight: () => (
                 <BottomSheetComponent
-                  buttonsList={buttonsList}
+                  name="Home"
+                  buttonsList={homeButtonsList}
                 ></BottomSheetComponent>
               ),
             }}
@@ -116,7 +140,7 @@ const RootNavigation: FC = () => {
             component={CreateChat}
             options={{
               headerStyle: {
-                backgroundColor: palette.dark[1000],
+                backgroundColor: palette.dark[700],
               },
               headerTitleStyle: { color: "white" },
               headerTitle: "Create a new chat",
@@ -130,7 +154,7 @@ const RootNavigation: FC = () => {
             component={Chat}
             options={{
               headerStyle: {
-                backgroundColor: palette.dark[1000],
+                backgroundColor: palette.dark[700],
               },
               headerTitleStyle: { color: "white" },
               headerBackTitleStyle: { fontSize: 30 },
@@ -139,6 +163,25 @@ const RootNavigation: FC = () => {
                 user.general.email === senderEmail
                   ? recipientEmail
                   : senderEmail,
+            }}
+          />
+          <Stack.Screen
+            name="Profile"
+            component={Profile}
+            options={{
+              headerStyle: {
+                backgroundColor: palette.dark[700],
+              },
+              headerTitleStyle: { color: "white" },
+              headerBackTitleStyle: { fontSize: 30 },
+              headerTintColor: palette.dark[100],
+              headerTitle: "My profile",
+              headerRight: () => (
+                <BottomSheetComponent
+                name="Profile"
+                  buttonsList={profileButtonsList}
+                ></BottomSheetComponent>
+              ),
             }}
           />
         </Stack.Navigator>
@@ -152,7 +195,7 @@ const RootNavigation: FC = () => {
             component={Login}
             options={{
               headerStyle: {
-                backgroundColor: "#131317",
+                backgroundColor: palette.dark[700],
               },
               headerTitleStyle: { color: "white" },
             }}
@@ -162,7 +205,7 @@ const RootNavigation: FC = () => {
             component={SignUp}
             options={{
               headerStyle: {
-                backgroundColor: "#131317",
+                backgroundColor: palette.dark[700],
               },
               headerTitleStyle: { color: "white" },
             }}
