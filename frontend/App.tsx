@@ -5,8 +5,18 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import RootNavigation from "./RootNavigation";
 import { palette } from "./shared/palette";
 import { NavigationContainer } from "@react-navigation/native";
+import AppLoading from "expo-app-loading";
+import { useFonts } from "expo-font";
 
 const App: FC = () => {
+  // Adding new fonts
+  const [fontsLoaded] = useFonts({
+    "cabin-regular": require("./assets/fonts/Cabin-Regular.ttf"),
+  });
+  if (!fontsLoaded) {
+    return <AppLoading />;
+  }
+
   return (
     <Provider store={store}>
       <SafeAreaProvider
