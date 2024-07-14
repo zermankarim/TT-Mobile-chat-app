@@ -34,8 +34,8 @@ const Home: FC<RouteProps> = () => {
       const q = query(
         collection(database, "chats"),
         or(
-          where("recipientEmail", "==", user.email),
-          where("senderEmail", "==", user.email)
+          where("recipientEmail", "==", user.general.email),
+          where("senderEmail", "==", user.general.email)
         )
       );
 
@@ -123,7 +123,7 @@ const Home: FC<RouteProps> = () => {
               My chats
             </Text>
             {chats
-              .filter((chat) => chat.createdBy === user.email)
+              .filter((chat) => chat.createdBy === user.general.email)
               .map((chat) => (
                 <ChatCard chat={chat}></ChatCard>
               ))}

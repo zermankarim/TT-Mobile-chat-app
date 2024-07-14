@@ -1,26 +1,26 @@
 import {
+  ActivityIndicator,
   Alert,
   NativeSyntheticEvent,
-  StyleSheet,
   Text,
   TextInputChangeEventData,
   View,
 } from "react-native";
 import { FC, SetStateAction, useState } from "react";
 import { Button, Input } from "@rneui/base";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../core/store/store";
+import { useDispatch } from "react-redux";
 import { loginUser } from "../core/reducers/user";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import { auth, database } from "../core/firebase/firebase";
-import { RouteProps } from "../shared/types";
+import { database } from "../core/firebase/firebase";
+import { IUserState, RouteProps } from "../shared/types";
 import { palette } from "../shared/palette";
-import { getDatabase, ref, child, get } from "firebase/database";
-import { collection, getDocs, query, where } from "firebase/firestore";
+import { and, collection, getDocs, query, where } from "firebase/firestore";
 
 const Login: FC<RouteProps> = ({ navigation }) => {
+  // Redux states and dispatch
   const dispatch = useDispatch();
 
+  // States
+  const [loadingLogin, setLoadingLogin] = useState<boolean>(false);
   const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const [showEmailError, setShowEmailError] =
@@ -53,10 +53,14 @@ const Login: FC<RouteProps> = ({ navigation }) => {
   };
 
   const onHandleLogin = async () => {
+    setLoadingLogin(true);
     if (email && password && email !== "" && password !== "") {
       const q = query(
         collection(database, "users"),
-        where("email", "==", email) && where("password", "==", password)
+        and(
+          where("general.email", "==", email.toLocaleLowerCase()),
+          where("secret.password", "==", password)
+        )
       );
 
       try {
@@ -64,16 +68,35 @@ const Login: FC<RouteProps> = ({ navigation }) => {
 
         if (querySnapshot.empty) {
           Alert.alert("Wrong email or password.");
+          console.log(email.toLocaleLowerCase());
+          setLoadingLogin(false);
           return;
         } else {
-          dispatch(loginUser({ email, password }));
+          const userDoc: IUserState =
+            querySnapshot.docs[0].data() as IUserState;
+          dispatch(loginUser(userDoc));
           console.log("Success Login!");
+          setLoadingLogin(false);
         }
       } catch (error: any) {
         Alert.alert("Error dureng finding user: ", error.message);
+        setLoadingLogin(false);
       }
     }
   };
+
+  if (loadingLogin) {
+    return (
+      <ActivityIndicator
+        size={"large"}
+        color={palette.light[100]}
+        style={{
+          flex: 1,
+          backgroundColor: palette.dark[700],
+        }}
+      ></ActivityIndicator>
+    );
+  }
 
   return (
     <View

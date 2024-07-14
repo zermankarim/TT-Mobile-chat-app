@@ -30,8 +30,11 @@ const SearchBarComponent: React.FunctionComponent<SearchBarComponentProps> = ({
     const q = query(
       collection(database, "users"),
       and(
-        or(where("email", ">", search), where("email", "==", search)),
-        where("email", "!=", user.email)
+        or(
+          where("general.email", ">", search),
+          where("general.email", "==", search)
+        ),
+        where("general.email", "!=", user.general.email)
       )
     );
 
@@ -41,8 +44,8 @@ const SearchBarComponent: React.FunctionComponent<SearchBarComponentProps> = ({
 
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
-          const userData = doc.data();
-          newUsersEmails.push(userData.email);
+          const userData:IUserState = doc.data() as IUserState;
+          newUsersEmails.push(userData.general.email!);
         });
 
         setUsersEmails(newUsersEmails);

@@ -1,4 +1,5 @@
 import {
+  ActivityIndicator,
   Alert,
   NativeSyntheticEvent,
   Text,
@@ -21,6 +22,7 @@ const SignUp: FC<RouteProps> = ({ navigation }) => {
   const dispatch = useDispatch();
 
   // States
+  const [loadingSignUp, setLoadingSignUp] = useState<boolean>(false);
   const [email, setEmail] = useState<string | null>(null);
   const [password, setPassword] = useState<string | null>(null);
   const [showEmailError, setShowEmailError] =
@@ -54,6 +56,7 @@ const SignUp: FC<RouteProps> = ({ navigation }) => {
   };
 
   const onHandleSignUp = async () => {
+    setLoadingSignUp(true);
     if (email && password && email !== "" && password !== "") {
       const q = query(
         collection(database, "users"),
@@ -70,18 +73,48 @@ const SignUp: FC<RouteProps> = ({ navigation }) => {
           return;
         } else {
           const newUser: IUserState = {
-            email,
-            password,
+            general: {
+              name: null,
+              surname: null,
+              dateOfBirth: null,
+              email: email.toLocaleLowerCase(),
+            },
+            images: {
+              backgroundURL: null,
+              avatar: null,
+            },
+            socialContacts: {
+              friends: [],
+            },
+            secret: {
+              password,
+            },
           };
           await addDoc(collection(database, "users"), newUser);
-          dispatch(loginUser({ email, password }));
+          dispatch(loginUser(newUser));
+          setLoadingSignUp(false);
+
           console.log("Success SignUp!");
         }
       } catch (error: any) {
         Alert.alert("Error dureng finding user: ", error.message);
+        setLoadingSignUp(false);
       }
     }
   };
+
+  if (loadingSignUp) {
+    return (
+      <ActivityIndicator
+        size={"large"}
+        color={palette.light[100]}
+        style={{
+          flex: 1,
+          backgroundColor: palette.dark[700],
+        }}
+      ></ActivityIndicator>
+    );
+  }
 
   return (
     <View // Container for SignUp page

@@ -80,7 +80,7 @@ const RootNavigation: FC = () => {
   ];
   return (
     <>
-      {user.email ? (
+      {user.general.email ? (
         <Stack.Navigator
           initialRouteName="Home" // Home page
         >
@@ -108,7 +108,6 @@ const RootNavigation: FC = () => {
                 backgroundColor: palette.dark[1000],
               },
               headerTitleStyle: { color: "white" },
-              headerBackTitle: "Custom Back",
               headerTitle: "Create a new chat",
               headerBackTitleStyle: { fontSize: 30 },
               headerTintColor: palette.dark[100],
@@ -123,11 +122,12 @@ const RootNavigation: FC = () => {
                 backgroundColor: palette.dark[1000],
               },
               headerTitleStyle: { color: "white" },
-              headerBackTitle: "Custom Back",
               headerBackTitleStyle: { fontSize: 30 },
               headerTintColor: palette.dark[100],
               headerTitle:
-                user.email === senderEmail ? recipientEmail : senderEmail,
+                user.general.email === senderEmail
+                  ? recipientEmail
+                  : senderEmail,
             }}
           />
         </Stack.Navigator>

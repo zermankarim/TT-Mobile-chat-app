@@ -40,7 +40,7 @@ const CreateChat: FC = () => {
     const getAllUsersEmails = async () => {
       const q = query(
         collection(database, "users"),
-        where("email", "!=", user.email)
+        where("email", "!=", user.general.email)
       );
       const querySnapshot = await getDocs(q);
       querySnapshot.forEach((doc) => {
@@ -67,8 +67,8 @@ const CreateChat: FC = () => {
           where("recipientEmail", "==", userEmailForNewChat)
         ),
         or(
-          where("senderEmail", "==", user.email),
-          where("recipientEmail", "==", user.email)
+          where("senderEmail", "==", user.general.email),
+          where("recipientEmail", "==", user.general.email)
         )
       )
     );
@@ -83,9 +83,9 @@ const CreateChat: FC = () => {
         const newChat: IChat = {
           _id: uuid.v4().toString(),
           createdAt: new Date().toISOString(),
-          createdBy: user.email!,
+          createdBy: user.general.email!,
           messages: [],
-          senderEmail: user.email!,
+          senderEmail: user.general.email!,
           recipientEmail: userEmailForNewChat,
         };
         await addDoc(collection(database, "chats"), newChat);
@@ -134,6 +134,7 @@ const CreateChat: FC = () => {
           {usersEmails.length ? (
             usersEmails.map((userEmail) => (
               <View
+                key={userEmail + "-userContainer"}
                 style={{
                   display: "flex",
                   flexDirection: "row",
@@ -147,6 +148,7 @@ const CreateChat: FC = () => {
                 }}
               >
                 <FontAwesome
+                  key={userEmail + "-userImage"}
                   name="user-circle-o"
                   size={48}
                   color={palette.light[600]}
@@ -157,6 +159,7 @@ const CreateChat: FC = () => {
                   {userEmail}
                 </Text>
                 <BottomSheetComponent
+                  key={userEmail + "-userBottomSheet"}
                   buttonsList={
                     // Buttons list created here because i need to get userEmail
                     [

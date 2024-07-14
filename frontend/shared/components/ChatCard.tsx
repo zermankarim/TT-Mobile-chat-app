@@ -3,7 +3,7 @@ import { FC } from "react";
 import { Alert, TouchableOpacity, View } from "react-native";
 import { palette } from "../palette";
 import { useNavigation } from "@react-navigation/native";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { FontAwesome } from "@expo/vector-icons";
 import { ChatScreenNavigationProp, IButtonsList, IChat } from "../types";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../core/store/store";
@@ -125,7 +125,7 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
             fontSize: 16,
           }}
         >
-          {user.email === chat.senderEmail
+          {user.general.email === chat.senderEmail
             ? chat.recipientEmail
             : chat.senderEmail}
         </Text>
@@ -138,7 +138,8 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
         >
           {messages.length ? (
             <>
-              {messages[messages.length - 1].senderEmail === user.email && (
+              {messages[messages.length - 1].senderEmail ===
+                user.general.email && (
                 <Text style={{ color: palette.dark[100] }}>You: </Text>
               )}
               <Text // Chat text field
@@ -160,7 +161,7 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
           )}
         </View>
       </View>
-      {chat.createdBy === user.email && (
+      {chat.createdBy === user.general.email && (
         <BottomSheetComponent buttonsList={buttonsList}></BottomSheetComponent>
       )}
     </TouchableOpacity>

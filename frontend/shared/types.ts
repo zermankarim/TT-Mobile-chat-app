@@ -5,8 +5,22 @@ export interface ICounterState {
 }
 
 export interface IUserState {
-  email: string | null;
-  password: string | null;
+  general: {
+    name: string | null;
+    surname: string | null;
+    dateOfBirth: string | null;
+    email: string | null;
+  };
+  images: {
+    backgroundURL: string | null;
+    avatar: string | null;
+  };
+  socialContacts: {
+    friends: string[];
+  };
+  secret: {
+    password: string | null;
+  };
 }
 
 export interface ILoginInputsState {
