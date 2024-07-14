@@ -1,10 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { SearchBar } from "@rneui/themed";
-import { View, Text, StyleSheet, Alert } from "react-native";
-import { getAuth } from "firebase/auth";
-import { and, collection, getDocs, or, query, where } from "firebase/firestore";
-import { database } from "../../core/firebase/firebase";
-import { IUserState } from "../types";
+import { View } from "react-native";
 import { useSelector } from "react-redux";
 import { RootState } from "../../core/store/store";
 import { palette } from "../palette";
@@ -31,9 +27,18 @@ const SearchBarComponent: React.FunctionComponent<SearchBarComponentProps> = ({
           borderBottomRightRadius: 24,
           borderBottomLeftRadius: 24,
           backgroundColor: palette.dark[600],
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 6,
+          },
+          shadowOpacity: 0.39,
+          shadowRadius: 8.3,
+
+          elevation: 13,
         }}
         inputContainerStyle={{
-         borderRadius: 12,
+          borderRadius: 12,
         }}
       />
     </View>

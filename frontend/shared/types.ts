@@ -12,7 +12,6 @@ export interface IUserState {
     email: string | null;
   };
   images: {
-    backgroundURL: string | null;
     avatar: string | null;
   };
   socialContacts: {
@@ -93,6 +92,7 @@ export interface IButtonsList {
 export interface IBottomSheetComponentProps {
   buttonsList: IButtonsList[];
   name: string;
+  icon?: React.ReactNode;
 }
 
 export interface IPalette {

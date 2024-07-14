@@ -24,7 +24,7 @@ import { setMessages } from "../core/reducers/messages";
 import { setCurrentChat } from "../core/reducers/currentChat";
 import uuid from "react-native-uuid";
 import { Button } from "@rneui/base";
-import { setIsVisibleBottomSheet } from "../core/reducers/isVisibleBottomSheet";
+import TextWithFont from "../shared/components/TextWithFont";
 
 const CreateChat: FC = () => {
   // Redux states and dispatch
@@ -178,6 +178,15 @@ const CreateChat: FC = () => {
             backgroundColor: palette.dark[600],
             borderTopLeftRadius: 36,
             borderTopRightRadius: 36,
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 6,
+            },
+            shadowOpacity: 0.39,
+            shadowRadius: 8.3,
+
+            elevation: 13,
           }}
         >
           {usersEmails.length ? (
@@ -200,8 +209,8 @@ const CreateChat: FC = () => {
                   size={48}
                   color={palette.light[600]}
                 />
-                <Text
-                  style={{
+                <TextWithFont
+                  styleProps={{
                     color: palette.light[800],
                     fontSize: 16,
                     flex: 1,
@@ -209,7 +218,7 @@ const CreateChat: FC = () => {
                   }}
                 >
                   {userEmail}
-                </Text>
+                </TextWithFont>
                 <BottomSheetComponent
                   key={userEmail + "-userBottomSheet"}
                   name="CreateNewChat"
@@ -241,7 +250,9 @@ const CreateChat: FC = () => {
                 flex: 1,
               }}
             >
-              <Text style={{ color: palette.light[800] }}>Users not found</Text>
+              <TextWithFont styleProps={{ color: palette.light[800] }}>
+                Users not found
+              </TextWithFont>
             </View>
           )}
         </View>

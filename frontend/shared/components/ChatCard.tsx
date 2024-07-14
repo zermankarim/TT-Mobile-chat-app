@@ -24,6 +24,7 @@ import {
 import { database } from "../../core/firebase/firebase";
 import { setChats } from "../../core/reducers/chats";
 import { format, isThisWeek, isToday, parseISO } from "date-fns";
+import TextWithFont from "./TextWithFont";
 
 interface IChatCartProps {
   chat: IChat;
@@ -124,8 +125,8 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
           flexDirection: "column",
         }}
       >
-        <Text // Chat title field
-          style={{
+        <TextWithFont // Chat title field
+          styleProps={{
             color: palette.blue[200],
             fontSize: 16,
           }}
@@ -133,7 +134,7 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
           {user.general.email === chat.senderEmail
             ? chat.recipientEmail
             : chat.senderEmail}
-        </Text>
+        </TextWithFont>
         <View
           style={{
             display: "flex",
@@ -146,33 +147,33 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
             <>
               {messages[messages.length - 1].senderEmail ===
                 user.general.email && (
-                <Text
-                  style={{
+                <TextWithFont
+                  styleProps={{
                     color: palette.dark[100],
                   }}
                 >
-                  You:{" "}
-                </Text>
+                  You:
+                </TextWithFont>
               )}
-              <Text // Chat text field
+              <TextWithFont // Chat text field
                 numberOfLines={1}
-                style={{
+                styleProps={{
                   color: palette.light[600],
                 }}
               >
                 {messages[messages.length - 1].text}
-              </Text>
+              </TextWithFont>
             </>
           ) : (
-            <Text // Chat text field
+            <TextWithFont // Chat text field
               numberOfLines={1}
-              style={{
+              styleProps={{
                 color: palette.light[200],
                 flex: 1,
               }}
             >
               Enter first message!
-            </Text>
+            </TextWithFont>
           )}
         </View>
       </View>
@@ -183,14 +184,14 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
           justifyContent: "flex-start",
         }}
       >
-        <Text
-          style={{
+        <TextWithFont
+          styleProps={{
             color: palette.light[100],
             flex: 1,
           }}
         >
           {formatMessageDate(chat.createdAt)}
-        </Text>
+        </TextWithFont>
       </View>
       {/* {chat.createdBy === user.general.email && (
         <BottomSheetComponent buttonsList={buttonsList}></BottomSheetComponent>

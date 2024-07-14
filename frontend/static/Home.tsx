@@ -18,6 +18,7 @@ import { database } from "../core/firebase/firebase";
 import { setChats } from "../core/reducers/chats";
 import { palette } from "../shared/palette";
 import SearchBarComponent from "../shared/components/SearchBar";
+import TextWithFont from "../shared/components/TextWithFont";
 
 const Home: FC<RouteProps> = () => {
   // Redux states and dispatch
@@ -160,14 +161,14 @@ const Home: FC<RouteProps> = () => {
                   width: "100%",
                 }}
               >
-                <Text
-                  style={{
+                <TextWithFont
+                  styleProps={{
                     fontSize: 16,
                     color: palette.light[300],
                   }}
                 >
                   All chats
-                </Text>
+                </TextWithFont>
               </View>
               {searchLoading ? (
                 <ActivityIndicator
@@ -221,14 +222,14 @@ const Home: FC<RouteProps> = () => {
                   width: "100%",
                 }}
               >
-                <Text
-                  style={{
+                <TextWithFont
+                  styleProps={{
                     fontSize: 16,
                     color: palette.light[300],
                   }}
                 >
                   My chats
-                </Text>
+                </TextWithFont>
               </View>
 
               {searchLoading ? (

@@ -4,23 +4,18 @@ import { View } from "react-native";
 import { Entypo } from "@expo/vector-icons";
 import { palette } from "../palette";
 import { IBottomSheetComponentProps } from "../types";
-import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "../../core/store/store";
-import { setIsVisibleBottomSheet } from "../../core/reducers/isVisibleBottomSheet";
 
 const BottomSheetComponent: React.FunctionComponent<
   IBottomSheetComponentProps
-> = ({ buttonsList, name }) => {
-  const isVisibleBottomSheet = useSelector(
-    (state: RootState) => state.isVisibleBottomSheet
-  );
-  const dispatch = useDispatch();
+> = ({ buttonsList, name, icon }) => {
+  // States
+  const [isVisible, setIsVisible] = useState<boolean>(false);
 
   return (
     <View>
       <Button
         title="Open Bottom Sheet"
-        onPress={() => dispatch(setIsVisibleBottomSheet(true))}
+        onPress={() => setIsVisible(true)}
         buttonStyle={{
           backgroundColor: "transparent",
           borderRadius: 50,
@@ -31,16 +26,18 @@ const BottomSheetComponent: React.FunctionComponent<
           marginVertical: 10,
         }}
       >
-        <Entypo
-          name="dots-three-vertical"
-          size={24}
-          color={palette.light[800]}
-        />
+        {icon || (
+          <Entypo
+            name="dots-three-vertical"
+            size={24}
+            color={palette.light[800]}
+          />
+        )}
       </Button>
       <BottomSheet
         modalProps={{}}
-        isVisible={isVisibleBottomSheet}
-        onBackdropPress={() => dispatch(setIsVisibleBottomSheet(false))}
+        isVisible={isVisible}
+        onBackdropPress={() => setIsVisible(false)}
       >
         {buttonsList.map((l, i) => (
           <ListItem
@@ -54,7 +51,7 @@ const BottomSheetComponent: React.FunctionComponent<
             }}
             onPress={() => {
               l.onPress();
-              dispatch(setIsVisibleBottomSheet(false));
+              setIsVisible(false);
             }}
           >
             <ListItem.Content
@@ -69,6 +66,7 @@ const BottomSheetComponent: React.FunctionComponent<
               <ListItem.Title
                 style={{
                   color: palette.light[800],
+                  fontFamily: "cabin-regular",
                 }}
               >
                 {l.title}

@@ -25,6 +25,7 @@ import { RootState } from "../core/store/store";
 import { Ionicons } from "@expo/vector-icons";
 import { IChat, IMessage } from "../shared/types";
 import { setCurrentChat } from "../core/reducers/currentChat";
+import TextWithFont from "../shared/components/TextWithFont";
 
 const Chat: FC = () => {
   // Redux states and dispatch
@@ -175,22 +176,31 @@ const Chat: FC = () => {
                       ? palette.blue[300]
                       : palette.dark[300],
                   marginBottom: 12,
+                  shadowColor: "#000",
+                  shadowOffset: {
+                    width: 0,
+                    height: 6,
+                  },
+                  shadowOpacity: 0.39,
+                  shadowRadius: 8.3,
+
+                  elevation: 13,
                 }}
               >
-                <Text // Container for message text
+                <TextWithFont
                   key={message._id + "-messageText"}
-                  style={{
+                  styleProps={{
                     color: palette.light[1000],
                   }}
                 >
                   {message.text}
-                </Text>
+                </TextWithFont>
               </View>
             </View>
           ))
           .reverse()}
       </ScrollView>
-      <View
+      <View // Container for entering and sending message
         style={{
           display: "flex",
           flexDirection: "row",
@@ -200,6 +210,15 @@ const Chat: FC = () => {
           padding: 12,
           backgroundColor: palette.dark[600],
           borderRadius: 24,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 6,
+          },
+          shadowOpacity: 0.39,
+          shadowRadius: 8.3,
+
+          elevation: 13,
         }}
       >
         <TextInput

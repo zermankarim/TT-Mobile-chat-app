@@ -14,6 +14,7 @@ import { database } from "../core/firebase/firebase";
 import { IUserState, RouteProps } from "../shared/types";
 import { palette } from "../shared/palette";
 import { and, collection, getDocs, query, where } from "firebase/firestore";
+import TextWithFont from "../shared/components/TextWithFont";
 
 const Login: FC<RouteProps> = ({ navigation }) => {
   // Redux states and dispatch
@@ -99,99 +100,131 @@ const Login: FC<RouteProps> = ({ navigation }) => {
   }
 
   return (
-    <View
+    <View // Outer container
       style={{
         flex: 1,
         justifyContent: "center",
         backgroundColor: palette.dark[700],
-        alignItems: "center",
-        padding: 10,
       }}
     >
-      <Text
+      <View // Inner container
         style={{
-          fontSize: 30,
-          color: "white",
-        }}
-      >
-        Login
-      </Text>
-      <View
-        style={{
-          display: "flex",
-          flexDirection: "column",
-          marginTop: 20,
-          width: "100%",
-        }}
-      >
-        <Input
-          placeholder="Login"
-          onChange={handleLoginChange}
-          errorStyle={{ color: "red" }}
-          style={{
-            color: "white",
-          }}
-          errorMessage={
-            !email && showEmailError ? "This field must be fill" : ""
-          }
-        ></Input>
-        <Input
-          placeholder="Password"
-          onChange={handlePasswordChange}
-          errorStyle={{ color: "red" }}
-          style={{
-            color: "white",
-          }}
-          secureTextEntry={true}
-          errorMessage={
-            !password && showPasswordError ? "This field must be fill" : ""
-          }
-        ></Input>
-      </View>
-
-      <Button
-        title="Log in"
-        onPress={onHandleLogin}
-        loading={false}
-        loadingProps={{ size: "small", color: "white" }}
-        buttonStyle={{
-          backgroundColor: palette.blue[200],
-          borderRadius: 5,
-          width: "100%",
-        }}
-        titleStyle={{ fontWeight: "bold", fontSize: 16 }}
-        containerStyle={{
-          marginHorizontal: 50,
-          height: 50,
-          marginVertical: 10,
-          width: "100%",
-        }}
-      />
-      <View
-        style={{
-          display: "flex",
+          flex: 1,
           justifyContent: "center",
+          backgroundColor: palette.dark[900],
           alignItems: "center",
-          flexDirection: "row",
-          gap: 8,
-          width: "100%",
+          padding: 10,
+          borderTopLeftRadius: 250,
+          borderBottomRightRadius: 250,
+          shadowColor: "#000",
+          shadowOffset: {
+            width: 0,
+            height: 6,
+          },
+          shadowOpacity: 0.23,
+          shadowRadius: 8.3,
+          elevation: 10,
         }}
       >
-        <Text
-          style={{
+        <TextWithFont
+          styleProps={{
+            fontSize: 30,
             color: "white",
           }}
         >
-          Don't have an account?
-        </Text>
-        <Text
-          onPress={() => navigation.navigate("SignUp")}
+          Login
+        </TextWithFont>
+        <View
           style={{
-            color: palette.blue[300],
+            display: "flex",
+            flexDirection: "column",
+            marginTop: 20,
+            width: "100%",
           }}
         >
-          Sign Up
-        </Text>
+          <Input
+            placeholder="Login"
+            onChange={handleLoginChange}
+            errorStyle={{ color: "red" }}
+            style={{
+              color: "white",
+            }}
+            errorMessage={
+              !email && showEmailError ? "This field must be fill" : ""
+            }
+          ></Input>
+          <Input
+            placeholder="Password"
+            onChange={handlePasswordChange}
+            errorStyle={{ color: "red" }}
+            style={{
+              color: "white",
+            }}
+            secureTextEntry={true}
+            errorMessage={
+              !password && showPasswordError ? "This field must be fill" : ""
+            }
+          ></Input>
+        </View>
+
+        <Button
+          title="Log in"
+          onPress={onHandleLogin}
+          loading={false}
+          loadingProps={{ size: "small", color: "white" }}
+          buttonStyle={{
+            backgroundColor: palette.blue[200],
+            borderRadius: 5,
+            width: "100%",
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 6,
+            },
+            shadowOpacity: 0.23,
+            shadowRadius: 8.3,
+            elevation: 10,
+          }}
+          titleStyle={{ fontWeight: "bold", fontSize: 16 }}
+          containerStyle={{
+            marginHorizontal: 50,
+            height: 50,
+            marginVertical: 10,
+            width: "100%",
+          }}
+        />
+        <View
+          style={{
+            display: "flex",
+            justifyContent: "center",
+            alignItems: "center",
+            flexDirection: "row",
+            gap: 8,
+            width: "100%",
+          }}
+        >
+          <TextWithFont
+            styleProps={{
+              color: "white",
+            }}
+          >
+            Don't have an account?
+          </TextWithFont>
+          <Button
+            onPress={() => navigation.navigate("SignUp")}
+            buttonStyle={{
+              backgroundColor: "transparent",
+            }}
+          >
+            <TextWithFont
+              styleProps={{
+                color: palette.blue[300],
+              }}
+            >
+              Sign Up
+            </TextWithFont>
+          </Button>
+        </View>
       </View>
     </View>
   );

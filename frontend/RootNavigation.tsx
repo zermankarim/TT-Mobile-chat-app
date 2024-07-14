@@ -1,15 +1,15 @@
-import { ActivityIndicator, Alert, StyleSheet, View } from "react-native";
+import { Alert, StyleSheet } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "./core/store/store";
 import Login from "./static/Login";
-import { FC, useEffect, useState } from "react";
+import { FC } from "react";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 import { useNavigation } from "@react-navigation/native";
 import Home from "./static/Home";
 import SignUp from "./static/SignUp";
-import { onAuthStateChanged, signOut } from "firebase/auth";
+import { signOut } from "firebase/auth";
 import { auth } from "./core/firebase/firebase";
-import { loginUser, logoutUser } from "./core/reducers/user";
+import { logoutUser } from "./core/reducers/user";
 import {
   CreateChatScreenNavigationProp,
   IButtonsList,
@@ -25,6 +25,7 @@ import { MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomSheetComponent from "./shared/components/BottomSheet";
 import CreateChat from "./static/CreateChat";
 import Profile from "./static/Profile";
+import { AntDesign } from "@expo/vector-icons";
 
 const styles = StyleSheet.create({
   container: {
@@ -125,7 +126,7 @@ const RootNavigation: FC = () => {
               headerStyle: {
                 backgroundColor: palette.dark[700],
               },
-              headerTitleStyle: { color: "white" },
+              headerTitleStyle: { color: "white", fontFamily: "cabin-regular" },
               headerRight: () => (
                 <BottomSheetComponent
                   name="Home"
@@ -142,7 +143,7 @@ const RootNavigation: FC = () => {
               headerStyle: {
                 backgroundColor: palette.dark[700],
               },
-              headerTitleStyle: { color: "white" },
+              headerTitleStyle: { color: "white", fontFamily: "cabin-regular" },
               headerTitle: "Create a new chat",
               headerBackTitleStyle: { fontSize: 30 },
               headerTintColor: palette.dark[100],
@@ -156,7 +157,7 @@ const RootNavigation: FC = () => {
               headerStyle: {
                 backgroundColor: palette.dark[700],
               },
-              headerTitleStyle: { color: "white" },
+              headerTitleStyle: { color: "white", fontFamily: "cabin-regular" },
               headerBackTitleStyle: { fontSize: 30 },
               headerTintColor: palette.dark[100],
               headerTitle:
@@ -172,13 +173,20 @@ const RootNavigation: FC = () => {
               headerStyle: {
                 backgroundColor: palette.dark[700],
               },
-              headerTitleStyle: { color: "white" },
+              headerTitleStyle: { color: "white", fontFamily: "cabin-regular" },
               headerBackTitleStyle: { fontSize: 30 },
               headerTintColor: palette.dark[100],
               headerTitle: "My profile",
               headerRight: () => (
                 <BottomSheetComponent
-                name="Profile"
+                  name="Profile"
+                  icon={
+                    <AntDesign
+                      name="setting"
+                      size={24}
+                      color={palette.light[800]}
+                    />
+                  }
                   buttonsList={profileButtonsList}
                 ></BottomSheetComponent>
               ),
@@ -197,7 +205,7 @@ const RootNavigation: FC = () => {
               headerStyle: {
                 backgroundColor: palette.dark[700],
               },
-              headerTitleStyle: { color: "white" },
+              headerTitleStyle: { color: "white", fontFamily: "cabin-regular" },
             }}
           />
           <Stack.Screen // SignUp page
@@ -207,7 +215,7 @@ const RootNavigation: FC = () => {
               headerStyle: {
                 backgroundColor: palette.dark[700],
               },
-              headerTitleStyle: { color: "white" },
+              headerTitleStyle: { color: "white", fontFamily: "cabin-regular" },
             }}
           />
         </Stack.Navigator>
