@@ -6,6 +6,7 @@ import {
   NativeSyntheticEvent,
   TextInputChangeEventData,
   ActivityIndicator,
+  TextInput,
 } from "react-native";
 import { palette } from "../shared/palette";
 import { Input } from "@rneui/themed";
@@ -73,8 +74,9 @@ const Chat: FC = () => {
     const newMessage: IMessage = {
       _id: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-      senderEmail: user.email!,
-      recipientEmail: user.email === senderEmail ? recipientEmail : senderEmail,
+      senderEmail: user.general.email!,
+      recipientEmail:
+        user.general.email === senderEmail ? recipientEmail : senderEmail,
       text: messageText,
     };
     try {
@@ -129,6 +131,7 @@ const Chat: FC = () => {
         justifyContent: "flex-end",
         flex: 1,
         backgroundColor: palette.dark[700],
+        padding: 24,
       }}
     >
       <ScrollView
@@ -142,73 +145,80 @@ const Chat: FC = () => {
           flexDirection: "column-reverse",
         }}
       >
-        {currentChat.messages.map((message) => (
-          <View // Container for message row
-            key={message._id + "-messageRow"}
-            style={{
-              display: "flex",
-              flexDirection: "row",
-              justifyContent:
-                message.senderEmail === user.email ? "flex-end" : "flex-start",
-              width: "100%",
-            }}
-          >
-            <View // Container for message
-              key={message._id + "-message"}
+        {currentChat.messages
+          .map((message) => (
+            <View // Container for message row
+              key={message._id + "-messageRow"}
               style={{
-                maxWidth: "70%",
-                borderRadius: 8,
-                padding: 8,
-                backgroundColor:
-                  message.senderEmail === user.email
-                    ? palette.blue[300]
-                    : palette.dark[300],
-                marginBottom: 12,
+                display: "flex",
+                flexDirection: "row",
+                justifyContent:
+                  message.senderEmail === user.general.email
+                    ? "flex-end"
+                    : "flex-start",
+                width: "100%",
               }}
             >
-              <Text // Container for message text
-                key={message._id + "-messageText"}
+              <View // Container for message
+                key={message._id + "-message"}
                 style={{
-                  color: palette.light[800],
+                  maxWidth: "70%",
+                  borderTopLeftRadius: 12,
+                  borderTopRightRadius: 12,
+                  borderBottomLeftRadius:
+                    message.senderEmail === user.general.email ? 12 : 0,
+                  borderBottomRightRadius:
+                    message.senderEmail === user.general.email ? 0 : 12,
+                  padding: 12,
+                  backgroundColor:
+                    message.senderEmail === user.general.email
+                      ? palette.blue[300]
+                      : palette.dark[300],
+                  marginBottom: 12,
                 }}
               >
-                {message.text}
-              </Text>
+                <Text // Container for message text
+                  key={message._id + "-messageText"}
+                  style={{
+                    color: palette.light[1000],
+                  }}
+                >
+                  {message.text}
+                </Text>
+              </View>
             </View>
-          </View>
-        )).reverse()}
+          ))
+          .reverse()}
       </ScrollView>
       <View
         style={{
           display: "flex",
           flexDirection: "row",
+          justifyContent: "center",
+          alignItems: "center",
           width: "100%",
-          borderTopWidth: 1,
-          borderTopColor: palette.dark[500],
-          paddingVertical: 12,
-          backgroundColor: palette.dark[800],
+          padding: 12,
+          backgroundColor: palette.dark[600],
+          borderRadius: 24,
         }}
       >
-        <Input
-          placeholder="Enter Your message.."
+        <TextInput
+          placeholder="Enter Your message"
+          placeholderTextColor={palette.light[100]}
+          value={messageText}
           onChange={(e: NativeSyntheticEvent<TextInputChangeEventData>) =>
             setMessageText(e.nativeEvent.text)
           }
-          value={messageText}
-          containerStyle={{ width: "85%" }}
-          inputStyle={{
-            borderWidth: 1,
-            borderRadius: 5,
-            borderColor: palette.dark[600],
-            padding: 4,
-            fontSize: 14,
-            color: palette.light[600],
+          style={{
+            display: "flex",
+            width: "85%",
+            color: palette.light[800],
           }}
-        />
+        ></TextInput>
         <Button
           onPress={onSend}
           containerStyle={{ flex: 1 }}
-          buttonStyle={{ backgroundColor: palette.blue[200] }}
+          buttonStyle={{ backgroundColor: "transparent" }}
         >
           <Ionicons name="send-sharp" size={24} color="white" />
         </Button>

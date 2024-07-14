@@ -23,6 +23,7 @@ import {
 } from "firebase/firestore";
 import { database } from "../../core/firebase/firebase";
 import { setChats } from "../../core/reducers/chats";
+import { format, isThisWeek, isToday, parseISO } from "date-fns";
 
 interface IChatCartProps {
   chat: IChat;
@@ -70,6 +71,18 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
     }
   };
 
+  const formatMessageDate = (isoString: string): string => {
+    const date = parseISO(isoString);
+
+    if (isToday(date)) {
+      return format(date, "HH:mm"); // Сегодня, показываем время
+    } else if (isThisWeek(date)) {
+      return format(date, "EEE"); // На этой неделе, показываем день недели
+    } else {
+      return format(date, "dd MMM"); // Больше недели, показываем дату
+    }
+  };
+
   // Buttons list
   const buttonsList: IButtonsList[] = [
     {
@@ -82,11 +95,6 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
         />
       ),
       onPress: () => handleRemoveChat(),
-    },
-    {
-      title: "Cancel",
-      icon: null,
-      onPress: () => {},
     },
   ];
 
@@ -101,12 +109,9 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
       style={{
         display: "flex",
         flexDirection: "row",
-        alignItems: "center",
         gap: 12,
         backgroundColor: palette.dark[600],
         borderRadius: 5,
-        borderColor: palette.dark[100],
-        borderWidth: 1,
         marginTop: 10,
         padding: 8,
       }}
@@ -132,6 +137,7 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
         <View
           style={{
             display: "flex",
+            maxWidth: "90%",
             flexDirection: "row",
             gap: 4,
           }}
@@ -140,9 +146,16 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
             <>
               {messages[messages.length - 1].senderEmail ===
                 user.general.email && (
-                <Text style={{ color: palette.dark[100] }}>You: </Text>
+                <Text
+                  style={{
+                    color: palette.dark[100],
+                  }}
+                >
+                  You:{" "}
+                </Text>
               )}
               <Text // Chat text field
+                numberOfLines={1}
                 style={{
                   color: palette.light[600],
                 }}
@@ -152,8 +165,10 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
             </>
           ) : (
             <Text // Chat text field
+              numberOfLines={1}
               style={{
                 color: palette.light[200],
+                flex: 1,
               }}
             >
               Enter first message!
@@ -161,9 +176,25 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
           )}
         </View>
       </View>
-      {chat.createdBy === user.general.email && (
+      <View
+        style={{
+          display: "flex",
+          flexDirection: "column",
+          justifyContent: "flex-start",
+        }}
+      >
+        <Text
+          style={{
+            color: palette.light[100],
+            flex: 1,
+          }}
+        >
+          {formatMessageDate(chat.createdAt)}
+        </Text>
+      </View>
+      {/* {chat.createdBy === user.general.email && (
         <BottomSheetComponent buttonsList={buttonsList}></BottomSheetComponent>
-      )}
+      )} */}
     </TouchableOpacity>
   );
 };
