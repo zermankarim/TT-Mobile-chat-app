@@ -34,6 +34,7 @@ export type RootStackParamList = {
   Login: undefined;
   SignUp: undefined;
   CreateChat: undefined;
+  Profile: undefined;
 };
 
 export type LoginScreenNavigationProp = StackNavigationProp<
@@ -61,6 +62,11 @@ export type RouteProps = {
   navigation: LoginScreenNavigationProp;
 };
 
+export type ProfileScreenNavigationProp = StackNavigationProp<
+  RootStackParamList,
+  "Profile"
+>;
+
 export interface IChat {
   _id: string;
   createdAt: string;
@@ -86,6 +92,7 @@ export interface IButtonsList {
 
 export interface IBottomSheetComponentProps {
   buttonsList: IButtonsList[];
+  name: string;
 }
 
 export interface IPalette {
