@@ -9,7 +9,6 @@ const initialState: IUserState = {
     email: null,
   },
   images: {
-    backgroundURL: null,
     avatar: null,
   },
   socialContacts: {
@@ -34,7 +33,6 @@ const userSlice = createSlice({
       socialContacts.friends = action.payload.socialContacts.friends;
 
       images.avatar = action.payload.images.avatar;
-      images.backgroundURL = action.payload.images.backgroundURL;
 
       secret.password = action.payload.secret.password;
     },
@@ -48,7 +46,6 @@ const userSlice = createSlice({
       socialContacts.friends = [];
 
       images.avatar = null;
-      images.backgroundURL = null;
 
       secret.password = null;
     },
