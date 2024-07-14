@@ -19,7 +19,7 @@ import {
 } from "./shared/types";
 import Chat from "./static/Chat";
 import { palette } from "./shared/palette";
-import { Ionicons } from "@expo/vector-icons";
+import { FontAwesome, Ionicons } from "@expo/vector-icons";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import BottomSheetComponent from "./shared/components/BottomSheet";
 import CreateChat from "./static/CreateChat";
@@ -56,6 +56,17 @@ const RootNavigation: FC = () => {
 
   // Buttons for menu
   const buttonsList: IButtonsList[] = [
+    {
+      title: "My profile",
+      icon: (
+        <FontAwesome
+          name="user-circle-o"
+          size={24}
+          color={palette.light[600]}
+        />
+      ),
+      onPress: () => navigation.navigate("CreateChat"),
+    },
     {
       title: "Create a new chat",
       icon: <Ionicons name="create" size={24} color={palette.light[800]} />,
