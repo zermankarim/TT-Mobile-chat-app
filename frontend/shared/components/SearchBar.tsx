@@ -7,62 +7,34 @@ import { database } from "../../core/firebase/firebase";
 import { IUserState } from "../types";
 import { useSelector } from "react-redux";
 import { RootState } from "../../core/store/store";
+import { palette } from "../palette";
 
 type SearchBarComponentProps = {
-  setUsersEmails: React.Dispatch<React.SetStateAction<string[]>>;
-  setSearchLoading: React.Dispatch<React.SetStateAction<boolean>>;
+  updateSearchFunction: (search: any) => Promise<void>;
+  search: string;
 };
 
 const SearchBarComponent: React.FunctionComponent<SearchBarComponentProps> = ({
-  setUsersEmails,
-  setSearchLoading,
+  updateSearchFunction,
+  search,
 }) => {
   // Redux states
   const user = useSelector((state: RootState) => state.user);
-
-  // States
-  const [search, setSearch] = useState("");
-
-  // Functions
-  const updateSearch = async (search: any) => {
-    setSearchLoading(true);
-    setSearch(search);
-    const q = query(
-      collection(database, "users"),
-      and(
-        or(
-          where("general.email", ">", search),
-          where("general.email", "==", search)
-        ),
-        where("general.email", "!=", user.general.email)
-      )
-    );
-
-    try {
-      const newUsersEmails: string[] = [];
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        querySnapshot.forEach((doc) => {
-          const userData:IUserState = doc.data() as IUserState;
-          newUsersEmails.push(userData.general.email!);
-        });
-
-        setUsersEmails(newUsersEmails);
-        setSearchLoading(false);
-      }
-    } catch (error: any) {
-      Alert.alert("Error dureng finding user: ", error.message);
-      setSearchLoading(false);
-    }
-  };
 
   return (
     <View>
       <SearchBar
         placeholder="Search by email.."
-        onChangeText={updateSearch}
+        onChangeText={updateSearchFunction}
         value={search}
+        containerStyle={{
+          borderBottomRightRadius: 24,
+          borderBottomLeftRadius: 24,
+          backgroundColor: palette.dark[600],
+        }}
+        inputContainerStyle={{
+         borderRadius: 12,
+        }}
       />
     </View>
   );
