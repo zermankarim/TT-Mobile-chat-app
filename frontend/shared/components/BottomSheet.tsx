@@ -32,7 +32,11 @@ const BottomSheetComponent: React.FunctionComponent<
           color={palette.light[800]}
         />
       </Button>
-      <BottomSheet modalProps={{}} isVisible={isVisible}>
+      <BottomSheet
+        modalProps={{}}
+        isVisible={isVisible}
+        onBackdropPress={() => setIsVisible(false)}
+      >
         {buttonsList.map((l, i) => (
           <ListItem
             key={i}
