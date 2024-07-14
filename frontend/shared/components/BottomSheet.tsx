@@ -1,21 +1,26 @@
 import React, { useState } from "react";
 import { BottomSheet, Button, ListItem } from "@rneui/themed";
-import { StyleSheet, View } from "react-native";
+import { View } from "react-native";
 import { Entypo } from "@expo/vector-icons";
-import { Ionicons } from "@expo/vector-icons";
 import { palette } from "../palette";
 import { IBottomSheetComponentProps } from "../types";
+import { useDispatch, useSelector } from "react-redux";
+import { RootState } from "../../core/store/store";
+import { setIsVisibleBottomSheet } from "../../core/reducers/isVisibleBottomSheet";
 
 const BottomSheetComponent: React.FunctionComponent<
   IBottomSheetComponentProps
-> = ({ buttonsList }) => {
-  const [isVisible, setIsVisible] = useState(false);
+> = ({ buttonsList, name }) => {
+  const isVisibleBottomSheet = useSelector(
+    (state: RootState) => state.isVisibleBottomSheet
+  );
+  const dispatch = useDispatch();
 
   return (
     <View>
       <Button
         title="Open Bottom Sheet"
-        onPress={() => setIsVisible(true)}
+        onPress={() => dispatch(setIsVisibleBottomSheet(true))}
         buttonStyle={{
           backgroundColor: "transparent",
           borderRadius: 50,
@@ -34,8 +39,8 @@ const BottomSheetComponent: React.FunctionComponent<
       </Button>
       <BottomSheet
         modalProps={{}}
-        isVisible={isVisible}
-        onBackdropPress={() => setIsVisible(false)}
+        isVisible={isVisibleBottomSheet}
+        onBackdropPress={() => dispatch(setIsVisibleBottomSheet(false))}
       >
         {buttonsList.map((l, i) => (
           <ListItem
@@ -49,7 +54,7 @@ const BottomSheetComponent: React.FunctionComponent<
             }}
             onPress={() => {
               l.onPress();
-              setIsVisible(false);
+              dispatch(setIsVisibleBottomSheet(false));
             }}
           >
             <ListItem.Content
