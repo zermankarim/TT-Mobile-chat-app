@@ -9,7 +9,6 @@ import {
   TextInput,
 } from "react-native";
 import { palette } from "../shared/palette";
-import { Input } from "@rneui/themed";
 import {
   collection,
   doc,
@@ -26,10 +25,13 @@ import { Ionicons } from "@expo/vector-icons";
 import { IChat, IMessage } from "../shared/types";
 import { setCurrentChat } from "../core/reducers/currentChat";
 import TextWithFont from "../shared/components/TextWithFont";
+import uuid from "react-native-uuid";
 
 const Chat: FC = () => {
   // Redux states and dispatch
-  const currentChat = useSelector((state: RootState) => state.currentChat);
+  const currentChat: IChat = useSelector(
+    (state: RootState) => state.currentChat
+  );
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
@@ -48,13 +50,10 @@ const Chat: FC = () => {
 
   // Effects
   useEffect(() => {
-    const { senderEmail, recipientEmail } = currentChat;
     const q = query(
       collection(database, "chats"),
-      where("senderEmail", "==", senderEmail),
-      where("recipientEmail", "==", recipientEmail)
+      where("parcipients", "array-contains-any", currentChat.parcipients)
     );
-
     const unsubscribe = onSnapshot(q, (querySnapshot) => {
       if (!querySnapshot.empty) {
         const document = querySnapshot.docs[0];
@@ -71,21 +70,16 @@ const Chat: FC = () => {
 
   // Functions
   const onSend = async () => {
-    const { recipientEmail, senderEmail } = currentChat;
     const newMessage: IMessage = {
-      _id: new Date().toISOString(),
       createdAt: new Date().toISOString(),
-      senderEmail: user.general.email!,
-      recipientEmail:
-        user.general.email === senderEmail ? recipientEmail : senderEmail,
+      sender: user.uid!,
       text: messageText,
     };
     try {
       // Updating document (add a new message)
       const q = query(
         collection(database, "chats"),
-        where("senderEmail", "==", currentChat.senderEmail),
-        where("recipientEmail", "==", currentChat.recipientEmail)
+        where("parcipients", "array-contains-any", currentChat.parcipients)
       );
 
       let querySnapshot = await getDocs(q);
@@ -149,30 +143,26 @@ const Chat: FC = () => {
         {currentChat.messages
           .map((message) => (
             <View // Container for message row
-              key={message._id + "-messageRow"}
+              key={uuid.v4() + "-messageRow"}
               style={{
                 display: "flex",
                 flexDirection: "row",
                 justifyContent:
-                  message.senderEmail === user.general.email
-                    ? "flex-end"
-                    : "flex-start",
+                  message.sender === user.uid ? "flex-end" : "flex-start",
                 width: "100%",
               }}
             >
               <View // Container for message
-                key={message._id + "-message"}
+                key={uuid.v4() + "-message"}
                 style={{
                   maxWidth: "70%",
                   borderTopLeftRadius: 12,
                   borderTopRightRadius: 12,
-                  borderBottomLeftRadius:
-                    message.senderEmail === user.general.email ? 12 : 0,
-                  borderBottomRightRadius:
-                    message.senderEmail === user.general.email ? 0 : 12,
+                  borderBottomLeftRadius: message.sender === user.uid ? 12 : 0,
+                  borderBottomRightRadius: message.sender === user.uid ? 0 : 12,
                   padding: 12,
                   backgroundColor:
-                    message.senderEmail === user.general.email
+                    message.sender === user.uid
                       ? palette.blue[300]
                       : palette.dark[300],
                   marginBottom: 12,
@@ -188,7 +178,7 @@ const Chat: FC = () => {
                 }}
               >
                 <TextWithFont
-                  key={message._id + "-messageText"}
+                  key={uuid.v4() + "-messageText"}
                   styleProps={{
                     color: palette.light[1000],
                   }}

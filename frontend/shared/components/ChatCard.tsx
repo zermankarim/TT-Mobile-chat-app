@@ -1,15 +1,19 @@
 import { Text } from "@rneui/base";
-import { FC } from "react";
+import { FC, useEffect, useState } from "react";
 import { Alert, TouchableOpacity, View } from "react-native";
 import { palette } from "../palette";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
-import { ChatScreenNavigationProp, IButtonsList, IChat } from "../types";
+import {
+  ChatScreenNavigationProp,
+  IButtonsList,
+  IChat,
+  IUserState,
+} from "../types";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../core/store/store";
 import { setMessages } from "../../core/reducers/messages";
 import { setCurrentChat } from "../../core/reducers/currentChat";
-import BottomSheetComponent from "./BottomSheet";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
 import {
   and,
@@ -22,9 +26,9 @@ import {
   where,
 } from "firebase/firestore";
 import { database } from "../../core/firebase/firebase";
-import { setChats } from "../../core/reducers/chats";
 import { format, isThisWeek, isToday, parseISO } from "date-fns";
 import TextWithFont from "./TextWithFont";
+import { getUserDataByUid } from "../functions";
 
 interface IChatCartProps {
   chat: IChat;
@@ -37,52 +41,59 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
+  //States
+  const [recipientData, setRecipientData] = useState<IUserState | null>(null);
+
   // Functions
   const handleRemoveChat = async () => {
-    const updatedChatArr: IChat[] = [];
-    const { senderEmail, recipientEmail } = chat;
-
-    const q = query(
-      collection(database, "chats"),
-      and(
-        or(
-          where("senderEmail", "==", senderEmail),
-          where("recipientEmail", "==", senderEmail)
-        ),
-        or(
-          where("senderEmail", "==", recipientEmail),
-          where("recipientEmail", "==", recipientEmail)
-        )
-      )
-    );
-    const querySnapshot = await getDocs(q);
-
-    if (querySnapshot.empty) {
-      Alert.alert("Chat not found in database");
-      return;
-    } else {
-      const document = querySnapshot.docs[0];
-      const docRef = doc(database, "chats", document.id);
-      await deleteDoc(docRef);
-      console.log("Success removed!");
-    }
-    try {
-    } catch (e: any) {
-      Alert.alert("Error during deleting a chat: ", e.message);
-    }
+    // const updatedChatArr: IChat[] = [];
+    // const q = query(
+    //   collection(database, "chats"),
+    //   where("sender", "==", senderEmail)
+    // );
+    // const querySnapshot = await getDocs(q);
+    // if (querySnapshot.empty) {
+    //   Alert.alert("Chat not found in database");
+    //   return;
+    // } else {
+    //   const document = querySnapshot.docs[0];
+    //   const docRef = doc(database, "chats", document.id);
+    //   await deleteDoc(docRef);
+    //   console.log("Success removed!");
+    // }
+    // try {
+    // } catch (e: any) {
+    //   Alert.alert("Error during deleting a chat: ", e.message);
+    // }
   };
 
   const formatMessageDate = (isoString: string): string => {
     const date = parseISO(isoString);
 
     if (isToday(date)) {
-      return format(date, "HH:mm"); // Сегодня, показываем время
+      return format(date, "HH:mm");
     } else if (isThisWeek(date)) {
-      return format(date, "EEE"); // На этой неделе, показываем день недели
+      return format(date, "EEE");
     } else {
-      return format(date, "dd MMM"); // Больше недели, показываем дату
+      return format(date, "dd MMM");
     }
   };
+
+  // Effects
+  useEffect(() => {
+    const usersData: IUserState[] = [];
+    try {
+      chat.parcipients.map(async (parcipientUid) => {
+        const userData: IUserState = (await getUserDataByUid(
+          parcipientUid
+        )) as IUserState;
+        usersData.push(userData);
+      });
+      console.log(usersData);
+    } catch (e: any) {
+      console.error(e.message);
+    }
+  });
 
   // Buttons list
   const buttonsList: IButtonsList[] = [
@@ -131,9 +142,7 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
             fontSize: 16,
           }}
         >
-          {user.general.email === chat.senderEmail
-            ? chat.recipientEmail
-            : chat.senderEmail}
+          {user.uid}
         </TextWithFont>
         <View
           style={{
@@ -145,8 +154,7 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
         >
           {messages.length ? (
             <>
-              {messages[messages.length - 1].senderEmail ===
-                user.general.email && (
+              {messages[messages.length - 1].sender === user.uid && (
                 <TextWithFont
                   styleProps={{
                     color: palette.dark[100],
@@ -193,9 +201,6 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
           {formatMessageDate(chat.createdAt)}
         </TextWithFont>
       </View>
-      {/* {chat.createdBy === user.general.email && (
-        <BottomSheetComponent buttonsList={buttonsList}></BottomSheetComponent>
-      )} */}
     </TouchableOpacity>
   );
 };

@@ -9,7 +9,6 @@ import TextWithFont from "../shared/components/TextWithFont";
 
 const Profile: FC = () => {
   const user = useSelector((state: RootState) => state.user);
-  const { general, socialContacts } = user;
   return (
     <View
       style={{
@@ -23,13 +22,13 @@ const Profile: FC = () => {
       <Avatar
         size={200}
         rounded
-        source={{ uri: user.images.avatar! }}
-        title={user.general.surname![0] + " " + user.general.name![0]}
+        source={user.avatar ? { uri: user.avatar } : undefined}
+        title={user.firstName![0] + " " + user.lastName![0]}
         containerStyle={{
           position: "absolute",
           top: 100,
           margin: "auto",
-          backgroundColor: palette.dark[500],
+          backgroundColor: palette.dark[100],
           zIndex: 1,
           shadowColor: "#000",
           shadowOffset: {
@@ -75,7 +74,7 @@ const Profile: FC = () => {
               color: palette.light[800],
             }}
           >
-            {user.general.surname + " " + user.general.name}
+            {user.firstName + " " + user.lastName}
           </TextWithFont>
         </View>
       </ScrollView>

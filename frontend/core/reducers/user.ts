@@ -2,21 +2,13 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IUserState } from "../../shared/types";
 
 const initialState: IUserState = {
-  general: {
-    name: null,
-    surname: null,
-    dateOfBirth: null,
-    email: null,
-  },
-  images: {
-    avatar: null,
-  },
-  socialContacts: {
-    friends: [],
-  },
-  secret: {
-    password: null,
-  },
+  uid: null,
+  firstName: null,
+  lastName: null,
+  dateOfBirth: null,
+  email: null,
+  avatar: null,
+  friends: [],
 };
 
 const userSlice = createSlice({
@@ -24,30 +16,26 @@ const userSlice = createSlice({
   initialState,
   reducers: {
     loginUser: (state, action: PayloadAction<IUserState>) => {
-      const { general, secret, socialContacts, images } = state;
-      general.email = action.payload.general.email;
-      general.name = action.payload.general.name;
-      general.surname = action.payload.general.surname;
-      general.dateOfBirth = action.payload.general.dateOfBirth;
+      state.uid = action.payload.uid;
+      state.email = action.payload.email;
+      state.firstName = action.payload.firstName;
+      state.lastName = action.payload.lastName;
+      state.dateOfBirth = action.payload.dateOfBirth;
 
-      socialContacts.friends = action.payload.socialContacts.friends;
+      state.friends = action.payload.friends;
 
-      images.avatar = action.payload.images.avatar;
-
-      secret.password = action.payload.secret.password;
+      state.avatar = action.payload.avatar;
     },
     logoutUser: (state) => {
-      const { general, secret, socialContacts, images } = state;
-      general.email = null;
-      general.name = null;
-      general.surname = null;
-      general.dateOfBirth = null;
+      state.uid = null;
+      state.email = null;
+      state.firstName = null;
+      state.lastName = null;
+      state.dateOfBirth = null;
 
-      socialContacts.friends = [];
+      state.friends = [];
 
-      images.avatar = null;
-
-      secret.password = null;
+      state.avatar = null;
     },
   },
 });

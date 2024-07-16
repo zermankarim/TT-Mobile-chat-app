@@ -1,4 +1,3 @@
-import { Text } from "@rneui/themed";
 import { FC, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, View } from "react-native";
 import { palette } from "../shared/palette";
@@ -9,138 +8,109 @@ import {
   collection,
   getDocs,
   onSnapshot,
-  or,
   query,
   where,
 } from "firebase/firestore";
 import { database } from "../core/firebase/firebase";
-import { FontAwesome, Ionicons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import BottomSheetComponent from "../shared/components/BottomSheet";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../core/store/store";
 import { ChatScreenNavigationProp, IChat, IUserState } from "../shared/types";
 import { useNavigation } from "@react-navigation/native";
-import { setMessages } from "../core/reducers/messages";
 import { setCurrentChat } from "../core/reducers/currentChat";
-import uuid from "react-native-uuid";
-import { Button } from "@rneui/base";
+import { Avatar, Button } from "@rneui/base";
 import TextWithFont from "../shared/components/TextWithFont";
+import UserCardInSearch from "../shared/components/UserCardInSearch";
 
 const CreateChat: FC = () => {
   // Redux states and dispatch
   const user = useSelector((state: RootState) => state.user);
-  const dispatch = useDispatch();
-
-  const navigation = useNavigation<ChatScreenNavigationProp>();
 
   // States
-  const [usersEmails, setUsersEmails] = useState<string[]>([]);
+  const [usersForChat, setUsersForChat] = useState<IUserState[]>([]);
   const [searchLoading, setSearchLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
 
-  // Effects
-  useEffect(() => {
-    const q = query(
-      collection(database, "users"),
-      where("general.email", "!=", user.general.email)
-    );
-
-    const updateUsersEmailsState = async () => {
-      const unsubscribe = onSnapshot(q, (snapshot: any) => {
-        const newUsers: string[] = [];
-        snapshot.forEach((doc: any) => {
-          const useFromDB: IUserState = doc.data() as IUserState;
-          newUsers.push(useFromDB.general.email!);
-        });
-        setUsersEmails(newUsers);
-      });
-      return unsubscribe;
-    };
-
-    try {
-      updateUsersEmailsState();
-      setSearchLoading(false);
-    } catch (e: any) {
-      Alert.alert("Error during getting all users: ", e.message);
-      setSearchLoading(false);
-    }
-  }, []);
-
   //Functions
-  const handleCreateChatWithUser = async (userEmailForNewChat: string) => {
-    const q = query(
-      collection(database, "chats"),
-      and(
-        or(
-          where("senderEmail", "==", userEmailForNewChat),
-          where("recipientEmail", "==", userEmailForNewChat)
-        ),
-        or(
-          where("senderEmail", "==", user.general.email),
-          where("recipientEmail", "==", user.general.email)
-        )
-      )
-    );
 
-    try {
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        Alert.alert("Chat between You and this user already created.");
-        return;
-      } else {
-        const newChat: IChat = {
-          _id: uuid.v4().toString(),
-          createdAt: new Date().toISOString(),
-          createdBy: user.general.email!,
-          messages: [],
-          senderEmail: user.general.email!,
-          recipientEmail: userEmailForNewChat,
-        };
-        await addDoc(collection(database, "chats"), newChat);
-        dispatch(setMessages(newChat.messages));
-        dispatch(setCurrentChat(newChat));
-        navigation.navigate("Chat");
+  const updateUsersForChatState = async (q: any) => {
+    setSearchLoading(true);
+    const unsubscribe = onSnapshot(q, async (snapshot: any) => {
+      const newUsers: IUserState[] = [];
+      for (const doc of snapshot.docs) {
+        const userForChat: IUserState = doc.data() as IUserState;
+        const q = query(
+          collection(database, "chats"),
+          where("participants", "array-contains", user.uid)
+        );
+        const querySnapshot = await getDocs(q);
+        const chatExists = querySnapshot.docs.some((chatDoc) => {
+          const participants = chatDoc.data().participants;
+          return participants.includes(userForChat.uid);
+        });
+        // Push only users for creating new chat
+        if (!chatExists) {
+          newUsers.push(userForChat);
+        }
       }
-    } catch (error: any) {
-      Alert.alert("Error dureng finding user: ", error.message);
-    }
+      setUsersForChat(newUsers);
+      setSearchLoading(false);
+    });
+    return unsubscribe;
   };
 
   const updateSearchUsers = async (searchReq: string) => {
     setSearchLoading(true);
     setSearch(searchReq);
-    const q = query(
-      collection(database, "users"),
-      and(
-        or(
-          where("general.email", ">", searchReq.toLocaleLowerCase()),
-          where("general.email", "==", searchReq.toLocaleLowerCase())
-        ),
-        where("general.email", "!=", user.general.email)
-      )
-    );
+    let q;
+    if (!searchReq) {
+      q = query(collection(database, "users"), where("uid", "!=", user.uid));
+    } else {
+      q = query(
+        collection(database, "users"),
+        and(
+          where("email", "==", searchReq.toLocaleLowerCase()),
+          where("uid", "!=", user.uid)
+        )
+      );
+    }
 
     try {
-      const newUsersEmails: string[] = [];
+      const newUsersForChat: IUserState[] = [];
       const querySnapshot = await getDocs(q);
 
       if (!querySnapshot.empty) {
         querySnapshot.forEach((doc) => {
           const userData: IUserState = doc.data() as IUserState;
-          newUsersEmails.push(userData.general.email!);
+          newUsersForChat.push(userData);
         });
 
-        setUsersEmails(newUsersEmails);
+        setUsersForChat(newUsersForChat);
       } else {
-        setUsersEmails([]);
+        setUsersForChat([]);
       }
       setSearchLoading(false);
     } catch (error: any) {
-      Alert.alert("Error during finding user: ", error.message);
+      Alert.alert("Error during finding users: ", error.message);
+      console.log(error.message);
       setSearchLoading(false);
     }
   };
+
+  // Effects
+  useEffect(() => {
+    const q = query(
+      collection(database, "users"),
+      where("email", "!=", user.email)
+    );
+    try {
+      updateUsersForChatState(q);
+    } catch (e: any) {
+      Alert.alert("Error during getting all users: ", e.message);
+      setSearchLoading(false);
+    }
+  }, []);
 
   return (
     <View
@@ -189,57 +159,11 @@ const CreateChat: FC = () => {
             elevation: 13,
           }}
         >
-          {usersEmails.length ? (
-            usersEmails.map((userEmail) => (
-              <Button
-                key={userEmail + "-userContainer"}
-                style={{
-                  display: "flex",
-                  flexDirection: "row",
-                  alignItems: "center",
-                  padding: 12,
-                }}
-                buttonStyle={{
-                  backgroundColor: "transparent",
-                }}
-              >
-                <FontAwesome
-                  key={userEmail + "-userImage"}
-                  name="user-circle-o"
-                  size={48}
-                  color={palette.light[600]}
-                />
-                <TextWithFont
-                  styleProps={{
-                    color: palette.light[800],
-                    fontSize: 16,
-                    flex: 1,
-                    marginLeft: 12,
-                  }}
-                >
-                  {userEmail}
-                </TextWithFont>
-                <BottomSheetComponent
-                  key={userEmail + "-userBottomSheet"}
-                  name="CreateNewChat"
-                  buttonsList={
-                    // Buttons list created here because i need to get userEmail
-                    [
-                      {
-                        title: "Create chat with user",
-                        icon: (
-                          <Ionicons
-                            name="create"
-                            size={24}
-                            color={palette.light[800]}
-                          />
-                        ),
-                        onPress: () => handleCreateChatWithUser(userEmail),
-                      },
-                    ]
-                  }
-                ></BottomSheetComponent>
-              </Button>
+          {usersForChat.length ? (
+            usersForChat.map((userForChat) => (
+              <UserCardInSearch
+                userForChat={userForChat}
+              ></UserCardInSearch>
             ))
           ) : (
             <View

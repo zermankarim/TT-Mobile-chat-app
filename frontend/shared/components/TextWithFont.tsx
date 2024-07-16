@@ -3,7 +3,7 @@ import { FC } from "react";
 import { TextStyle } from "react-native";
 
 type MyAppTextProps = {
-  children: string;
+  children: React.ReactNode;
   styleProps?: TextStyle;
   numberOfLines?: number;
 };

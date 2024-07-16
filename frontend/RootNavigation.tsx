@@ -42,9 +42,9 @@ const RootNavigation: FC = () => {
   >();
   // Redux states and dispatch
   const user: IUserState = useSelector((state: RootState) => state.user);
-  const { senderEmail, recipientEmail }: IChat = useSelector(
-    (state: RootState) => state.currentChat
-  );
+  // const { sender }: IChat = useSelector(
+  //   (state: RootState) => state.currentChat
+  // );
   const dispatch = useDispatch();
 
   // States
@@ -115,7 +115,7 @@ const RootNavigation: FC = () => {
   ];
   return (
     <>
-      {user.general.email ? (
+      {user.email ? (
         <Stack.Navigator
           initialRouteName="Home" // Home page
         >
@@ -160,10 +160,8 @@ const RootNavigation: FC = () => {
               headerTitleStyle: { color: "white", fontFamily: "cabin-regular" },
               headerBackTitleStyle: { fontSize: 30 },
               headerTintColor: palette.dark[100],
-              headerTitle:
-                user.general.email === senderEmail
-                  ? recipientEmail
-                  : senderEmail,
+              // headerTitle:
+              //   user.email === senderEmail ? recipientEmail : senderEmail,
             }}
           />
           <Stack.Screen

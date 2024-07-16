@@ -8,6 +8,7 @@ import ChatCard from "../shared/components/ChatCard";
 import {
   and,
   collection,
+  getDoc,
   getDocs,
   onSnapshot,
   or,
@@ -19,6 +20,7 @@ import { setChats } from "../core/reducers/chats";
 import { palette } from "../shared/palette";
 import SearchBarComponent from "../shared/components/SearchBar";
 import TextWithFont from "../shared/components/TextWithFont";
+import uuid from "react-native-uuid";
 
 const Home: FC<RouteProps> = () => {
   // Redux states and dispatch
@@ -31,7 +33,6 @@ const Home: FC<RouteProps> = () => {
   const [chatsLoading, setChatsLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
   const [searchLoading, setSearchLoading] = useState<boolean>(true);
-  const [usersEmails, setUsersEmails] = useState<string[]>([]);
 
   // Effects
   useEffect(() => {
@@ -39,16 +40,14 @@ const Home: FC<RouteProps> = () => {
     const updateChats = async () => {
       const q = query(
         collection(database, "chats"),
-        or(
-          where("recipientEmail", "==", user.general.email),
-          where("senderEmail", "==", user.general.email)
-        )
+        where("parcipients", "array-contains", user.uid)
       );
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
         const newChats: IChat[] = [];
         snapshot.forEach((doc) => {
           const chatData: IChat = doc.data() as IChat;
+          console.log(chatData)
           newChats.push(chatData);
         });
         dispatch(setChats(newChats));
@@ -125,6 +124,23 @@ const Home: FC<RouteProps> = () => {
         backgroundColor: palette.dark[700],
       }}
     >
+      <Tab // Container for tab buttons
+        value={pageIndex}
+        onChange={(e) => setPageIndex(e)}
+        iconPosition="left"
+        indicatorStyle={{
+          backgroundColor: palette.light[600],
+          height: 3,
+        }}
+        containerStyle={{
+          backgroundColor: palette.dark[700],
+          height: 64,
+        }}
+        variant="primary"
+      >
+        <Tab.Item title="My chats" titleStyle={{ fontSize: 14 }} />
+        <Tab.Item title="All chats" titleStyle={{ fontSize: 14 }} />
+      </Tab>
       <TabView value={pageIndex} onChange={setPageIndex} animationType="spring">
         <TabView.Item style={{ width: "100%" }}>
           <View
@@ -167,7 +183,7 @@ const Home: FC<RouteProps> = () => {
                     color: palette.light[300],
                   }}
                 >
-                  All chats
+                  My chats
                 </TextWithFont>
               </View>
               {searchLoading ? (
@@ -179,9 +195,13 @@ const Home: FC<RouteProps> = () => {
                   }}
                 ></ActivityIndicator>
               ) : (
-                chats.map((chat) => (
-                  <ChatCard key={chat._id + "-chatCard"} chat={chat}></ChatCard>
-                ))
+                chats
+                  .map((chat) => (
+                    <ChatCard
+                      key={uuid.v4() + "-chatCard"}
+                      chat={chat}
+                    ></ChatCard>
+                  ))
               )}
             </ScrollView>
           </View>
@@ -228,7 +248,7 @@ const Home: FC<RouteProps> = () => {
                     color: palette.light[300],
                   }}
                 >
-                  My chats
+                  All chats
                 </TextWithFont>
               </View>
 
@@ -242,30 +262,16 @@ const Home: FC<RouteProps> = () => {
                 ></ActivityIndicator>
               ) : (
                 chats.map((chat) => (
-                  <ChatCard key={chat._id + "-chatCard"} chat={chat}></ChatCard>
+                  <ChatCard
+                    key={uuid.v4() + "-chatCard"}
+                    chat={chat}
+                  ></ChatCard>
                 ))
               )}
             </ScrollView>
           </View>
         </TabView.Item>
       </TabView>
-      <Tab // Container for tab buttons
-        value={pageIndex}
-        onChange={(e) => setPageIndex(e)}
-        iconPosition="left"
-        indicatorStyle={{
-          backgroundColor: palette.light[600],
-          height: 3,
-        }}
-        containerStyle={{
-          backgroundColor: palette.dark[700],
-          height: 64,
-        }}
-        variant="primary"
-      >
-        <Tab.Item title="All chats" titleStyle={{ fontSize: 14 }} />
-        <Tab.Item title="My chats" titleStyle={{ fontSize: 14 }} />
-      </Tab>
     </View>
   );
 };

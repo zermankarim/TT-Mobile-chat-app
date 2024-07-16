@@ -2,11 +2,9 @@ import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { IChat, IMessage } from "../../shared/types";
 
 const initialState: IChat = {
-  _id: "",
   createdAt: "",
   messages: [],
-  senderEmail: "",
-  recipientEmail: "",
+  parcipients: [],
   createdBy: "",
 };
 
@@ -15,13 +13,10 @@ const currentChatSlice = createSlice({
   initialState,
   reducers: {
     setCurrentChat: (state, action: PayloadAction<IChat>) => {
-      const { _id, createdAt, messages, senderEmail, recipientEmail } =
-        action.payload;
-      state._id = _id;
+      const { createdAt, messages, parcipients } = action.payload;
       state.createdAt = createdAt;
       state.messages = messages;
-      state.senderEmail = senderEmail;
-      state.recipientEmail = recipientEmail;
+      state.parcipients = parcipients;
     },
   },
 });

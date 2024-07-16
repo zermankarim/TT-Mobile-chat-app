@@ -5,21 +5,13 @@ export interface ICounterState {
 }
 
 export interface IUserState {
-  general: {
-    name: string | null;
-    surname: string | null;
-    dateOfBirth: string | null;
-    email: string | null;
-  };
-  images: {
-    avatar: string | null;
-  };
-  socialContacts: {
-    friends: string[];
-  };
-  secret: {
-    password: string | null;
-  };
+  uid: string | null;
+  firstName: string | null;
+  lastName: string | null;
+  dateOfBirth: string | null;
+  email: string | null;
+  avatar: string | null;
+  friends: string[];
 }
 
 export interface ILoginInputsState {
@@ -67,20 +59,16 @@ export type ProfileScreenNavigationProp = StackNavigationProp<
 >;
 
 export interface IChat {
-  _id: string;
   createdAt: string;
   createdBy: string;
   messages: IMessage[];
-  senderEmail: string;
-  recipientEmail: string;
+  parcipients: string[];
 }
 
 export interface IMessage {
-  _id: string;
   createdAt: string;
   text: string;
-  senderEmail: string;
-  recipientEmail: string;
+  sender: string;
 }
 
 export interface IButtonsList {

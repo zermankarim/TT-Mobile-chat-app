@@ -39,6 +39,7 @@ const SearchBarComponent: React.FunctionComponent<SearchBarComponentProps> = ({
         }}
         inputContainerStyle={{
           borderRadius: 12,
+          backgroundColor: palette.dark[400],
         }}
       />
     </View>
