@@ -2,16 +2,13 @@ import { FC, useEffect, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, View } from "react-native";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../core/store/store";
-import { IChat, RouteProps } from "../shared/types";
-import { Tab, TabView, Text } from "@rneui/base";
+import { IChatClient, IChatDB, IUserState, RouteProps } from "../shared/types";
+import { Tab, TabView } from "@rneui/base";
 import ChatCard from "../shared/components/ChatCard";
 import {
-  and,
   collection,
-  getDoc,
   getDocs,
   onSnapshot,
-  or,
   query,
   where,
 } from "firebase/firestore";
@@ -40,16 +37,29 @@ const Home: FC<RouteProps> = () => {
     const updateChats = async () => {
       const q = query(
         collection(database, "chats"),
-        where("parcipients", "array-contains", user.uid)
+        where("participants", "array-contains", user.uid)
       );
 
-      const unsubscribe = onSnapshot(q, (snapshot) => {
-        const newChats: IChat[] = [];
-        snapshot.forEach((doc) => {
-          const chatData: IChat = doc.data() as IChat;
-          console.log(chatData)
-          newChats.push(chatData);
-        });
+      const unsubscribe = onSnapshot(q, async (snapshot) => {
+        const newChats: IChatClient[] = [];
+        for (const doc of snapshot.docs) {
+          const chatDataFromDB: IChatDB = doc.data() as IChatDB;
+          const { participants } = chatDataFromDB;
+          const q = query(
+            collection(database, "users"),
+            where("uid", "in", participants)
+          );
+          const querySnapshot = await getDocs(q);
+          const usersData: IUserState[] = querySnapshot.docs.map((doc) =>
+            doc.data()
+          ) as IUserState[];
+
+          const chatForClient: IChatClient = {
+            ...chatDataFromDB,
+            participants: usersData,
+          };
+          newChats.push(chatForClient);
+        }
         dispatch(setChats(newChats));
         setChatsLoading(false);
         setSearchLoading(false);
@@ -67,35 +77,20 @@ const Home: FC<RouteProps> = () => {
   // Functions
   const updateSearchChats = async (searchReq: string) => {
     setSearchLoading(true);
-
     setSearch(searchReq);
-    const q = query(
-      collection(database, "chats"),
-      and(
-        or(
-          where("senderEmail", ">", searchReq.toLocaleLowerCase()),
-          where("recipientEmail", "==", searchReq.toLocaleLowerCase())
-        )
-      )
-    );
     try {
-      const newChats: IChat[] = [];
-      const querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        querySnapshot.forEach((doc) => {
-          const chatData: IChat = doc.data() as IChat;
-          newChats.push(chatData);
-        });
-        dispatch(setChats(newChats));
-        setSearchLoading(false);
-      } else {
-        dispatch(setChats([]));
-        setSearchLoading(false);
+      if (searchReq) {
+        const filteredChats = chats.filter((chat) =>
+          chat.participants.some((participant) =>
+            participant.email?.includes(searchReq.toLocaleLowerCase())
+          )
+        );
+        dispatch(setChats(filteredChats));
       }
+      setSearchLoading(false);
     } catch (error: any) {
       Alert.alert("Error during finding user: ", error.message);
-      console.log("Error during finding user: ", error.message);
+      console.error("Error during finding user: ", error.message);
       setSearchLoading(false);
     }
   };
@@ -195,13 +190,12 @@ const Home: FC<RouteProps> = () => {
                   }}
                 ></ActivityIndicator>
               ) : (
-                chats
-                  .map((chat) => (
-                    <ChatCard
-                      key={uuid.v4() + "-chatCard"}
-                      chat={chat}
-                    ></ChatCard>
-                  ))
+                chats.map((chat) => (
+                  <ChatCard
+                    key={uuid.v4() + "-chatCard"}
+                    chat={chat}
+                  ></ChatCard>
+                ))
               )}
             </ScrollView>
           </View>

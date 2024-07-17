@@ -22,17 +22,19 @@ import { database } from "../core/firebase/firebase";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../core/store/store";
 import { Ionicons } from "@expo/vector-icons";
-import { IChat, IMessage } from "../shared/types";
+import { IChatClient, IChatDB, IMessage } from "../shared/types";
 import { setCurrentChat } from "../core/reducers/currentChat";
 import TextWithFont from "../shared/components/TextWithFont";
 import uuid from "react-native-uuid";
+import { addMessage, setMessages } from "../core/reducers/messages";
 
 const Chat: FC = () => {
   // Redux states and dispatch
-  const currentChat: IChat = useSelector(
+  const currentChat: IChatClient = useSelector(
     (state: RootState) => state.currentChat
   );
   const user = useSelector((state: RootState) => state.user);
+  const messages = useSelector((state: RootState) => state.messages);
   const dispatch = useDispatch();
 
   //States
@@ -50,58 +52,55 @@ const Chat: FC = () => {
 
   // Effects
   useEffect(() => {
-    const q = query(
-      collection(database, "chats"),
-      where("parcipients", "array-contains-any", currentChat.parcipients)
-    );
-    const unsubscribe = onSnapshot(q, (querySnapshot) => {
-      if (!querySnapshot.empty) {
-        const document = querySnapshot.docs[0];
-        const updatedChat: IChat = document.data() as IChat;
-        dispatch(setCurrentChat(updatedChat));
-      } else {
-        console.log("No documents found");
-      }
-      setChatLoading(false);
-    });
+    if (currentChat) {
+      const q = query(
+        collection(database, "chats"),
+        where("id", "==", currentChat.id)
+      );
+      const unsubscribe = onSnapshot(q, (querySnapshot) => {
+        try {
+          if (!querySnapshot.empty) {
+            const document = querySnapshot.docs[0];
+            const updatedChat: IChatDB = document.data() as IChatDB;
+            dispatch(
+              setCurrentChat({
+                ...currentChat,
+                messages: updatedChat.messages,
+              })
+            );
+          }
+          setChatLoading(false);
+        } catch (error) {
+          console.error("Error on chat snapshot: ", error);
+          setChatLoading(false);
+        }
+      });
 
-    return () => unsubscribe();
+      return () => unsubscribe();
+    }
   }, []);
 
   // Functions
   const onSend = async () => {
+    setMessageText("");
+
     const newMessage: IMessage = {
       createdAt: new Date().toISOString(),
       sender: user.uid!,
       text: messageText,
     };
+
     try {
       // Updating document (add a new message)
-      const q = query(
-        collection(database, "chats"),
-        where("parcipients", "array-contains-any", currentChat.parcipients)
-      );
+      const chatDocRef = doc(database, "chats", currentChat.id);
+      await updateDoc(chatDocRef, {
+        messages: [...currentChat.messages, newMessage],
+      });
 
-      let querySnapshot = await getDocs(q);
-
-      if (!querySnapshot.empty) {
-        const document = querySnapshot.docs[0];
-        const foundChat: IChat = document.data() as IChat;
-        const newMessages: IMessage[] = [...foundChat.messages, newMessage];
-        setMessageText("");
-
-        await updateDoc(doc(database, "chats", document.id), {
-          messages: newMessages,
-        });
-        scrollToBottom();
-      } else {
-        console.log("No documents found");
-        return;
-      }
+      scrollToBottom();
+      dispatch(setMessages([...currentChat.messages, newMessage]));
     } catch (error) {
       console.error("Error updating document:", error);
-    } finally {
-      setMessageText("");
     }
   };
 

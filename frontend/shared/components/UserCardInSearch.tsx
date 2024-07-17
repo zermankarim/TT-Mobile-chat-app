@@ -1,11 +1,16 @@
 import { FC, useState } from "react";
 import { View } from "react-native";
-import { ChatScreenNavigationProp, IChat, IUserState } from "../types";
+import {
+  ChatScreenNavigationProp,
+  IChatClient,
+  IChatDB,
+  IUserState,
+} from "../types";
 import { Avatar, Button } from "@rneui/base";
 import uuid from "react-native-uuid";
 import TextWithFont from "./TextWithFont";
 import { palette } from "../palette";
-import { addDoc, collection } from "firebase/firestore";
+import { addDoc, collection, updateDoc } from "firebase/firestore";
 import { database } from "../../core/firebase/firebase";
 import { useNavigation } from "@react-navigation/native";
 import { useDispatch, useSelector } from "react-redux";
@@ -14,9 +19,13 @@ import { RootState } from "../../core/store/store";
 
 type UserCardInSearchProps = {
   userForChat: IUserState;
+  setCreateChatLoading: (createChatLoading: boolean) => void;
 };
 
-const UserCardInSearch: FC<UserCardInSearchProps> = ({ userForChat }) => {
+const UserCardInSearch: FC<UserCardInSearchProps> = ({
+  userForChat,
+  setCreateChatLoading,
+}) => {
   // Redux states and dispatch
   const dispatch = useDispatch();
   const user = useSelector((state: RootState) => state.user);
@@ -25,16 +34,34 @@ const UserCardInSearch: FC<UserCardInSearchProps> = ({ userForChat }) => {
   const navigation = useNavigation<ChatScreenNavigationProp>();
 
   const handleCreateChatWithUser = async () => {
-    const newChat: IChat = {
+    setCreateChatLoading(true);
+    const newChatForDB: IChatDB = {
+      id: "", // will be configured later
       createdAt: new Date().toISOString(),
       createdBy: user.uid!,
       messages: [],
-      parcipients: [user.uid!, userForChat.uid!],
+      participants: [user.uid!, userForChat.uid!],
     };
-    await addDoc(collection(database, "chats"), newChat);
+    const newChatForClient = {
+      id: "", // will be configured later
+      createdAt: new Date().toISOString(),
+      createdBy: user.uid!,
+      messages: [],
+      participants: [user, userForChat],
+    };
+    const docRef = await addDoc(collection(database, "chats"), newChatForDB);
+    const chatId = docRef.id;
+
+    // Adding id of doc to doc field "id"
+    await updateDoc(docRef, { id: chatId });
+
+    // Configuring "id" for chat on client
+    newChatForClient.id = chatId;
+    dispatch(setCurrentChat(newChatForClient));
+
+    setCreateChatLoading(false);
+
     navigation.navigate("Chat");
-    dispatch(setCurrentChat(newChat));
-    console.log("Created a new chat: ", newChat);
   };
   return (
     <View>

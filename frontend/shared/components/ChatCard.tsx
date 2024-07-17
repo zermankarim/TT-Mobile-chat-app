@@ -1,13 +1,13 @@
-import { Text } from "@rneui/base";
+import { Avatar, Text } from "@rneui/base";
 import { FC, useEffect, useState } from "react";
-import { Alert, TouchableOpacity, View } from "react-native";
+import { TouchableOpacity, View } from "react-native";
 import { palette } from "../palette";
 import { useNavigation } from "@react-navigation/native";
 import { FontAwesome } from "@expo/vector-icons";
 import {
   ChatScreenNavigationProp,
   IButtonsList,
-  IChat,
+  IChatClient,
   IUserState,
 } from "../types";
 import { useDispatch, useSelector } from "react-redux";
@@ -15,23 +15,12 @@ import { RootState } from "../../core/store/store";
 import { setMessages } from "../../core/reducers/messages";
 import { setCurrentChat } from "../../core/reducers/currentChat";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import {
-  and,
-  collection,
-  deleteDoc,
-  doc,
-  getDocs,
-  or,
-  query,
-  where,
-} from "firebase/firestore";
-import { database } from "../../core/firebase/firebase";
 import { format, isThisWeek, isToday, parseISO } from "date-fns";
 import TextWithFont from "./TextWithFont";
-import { getUserDataByUid } from "../functions";
+import { FontAwesome5 } from "@expo/vector-icons";
 
 interface IChatCartProps {
-  chat: IChat;
+  chat: IChatClient;
 }
 
 const ChatCard: FC<IChatCartProps> = ({ chat }) => {
@@ -41,12 +30,12 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
   const user = useSelector((state: RootState) => state.user);
   const dispatch = useDispatch();
 
-  //States
-  const [recipientData, setRecipientData] = useState<IUserState | null>(null);
+  const { participants } = chat;
+  const [oneRecipient, setOneRecipient] = useState<IUserState | null>(null);
 
   // Functions
   const handleRemoveChat = async () => {
-    // const updatedChatArr: IChat[] = [];
+    // const updatedChatArr: IChatClient[] = [];
     // const q = query(
     //   collection(database, "chats"),
     //   where("sender", "==", senderEmail)
@@ -81,19 +70,15 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
 
   // Effects
   useEffect(() => {
-    const usersData: IUserState[] = [];
-    try {
-      chat.parcipients.map(async (parcipientUid) => {
-        const userData: IUserState = (await getUserDataByUid(
-          parcipientUid
-        )) as IUserState;
-        usersData.push(userData);
-      });
-      console.log(usersData);
-    } catch (e: any) {
-      console.error(e.message);
+    if (participants.length === 2) {
+      const foundRecipient =
+        chat.participants.find(
+          (participant) => participant.email !== user.email
+        ) || null;
+
+      setOneRecipient(foundRecipient);
     }
-  });
+  }, []);
 
   // Buttons list
   const buttonsList: IButtonsList[] = [
@@ -128,7 +113,27 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
         padding: 8,
       }}
     >
-      <FontAwesome name="user-circle-o" size={48} color={palette.light[600]} />
+      {oneRecipient ? (
+        <Avatar
+          size={48}
+          rounded
+          title={oneRecipient.firstName![0] + " " + oneRecipient.lastName![0]}
+          containerStyle={{
+            backgroundColor: palette.dark[100],
+            shadowColor: "#000",
+            shadowOffset: {
+              width: 0,
+              height: 6,
+            },
+            shadowOpacity: 0.39,
+            shadowRadius: 8.3,
+
+            elevation: 13,
+          }}
+        ></Avatar>
+      ) : (
+        <FontAwesome5 name="users" size={38} color={palette.light[600]} />
+      )}
       <View // Container for email and message
         style={{
           display: "flex",
@@ -142,7 +147,14 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
             fontSize: 16,
           }}
         >
-          {user.uid}
+          {participants
+            .filter((participant) => participant.uid !== user.uid)
+            .map(
+              (participant) =>
+                participant.firstName + " " + participant.lastName
+            )
+            .join(" ")
+            .split("and")}
         </TextWithFont>
         <View
           style={{

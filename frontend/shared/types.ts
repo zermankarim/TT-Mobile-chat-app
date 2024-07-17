@@ -58,11 +58,20 @@ export type ProfileScreenNavigationProp = StackNavigationProp<
   "Profile"
 >;
 
-export interface IChat {
+export interface IChatClient {
+  id: string;
   createdAt: string;
   createdBy: string;
   messages: IMessage[];
-  parcipients: string[];
+  participants: IUserState[];
+}
+
+export interface IChatDB {
+  id: string;
+  createdAt: string;
+  createdBy: string;
+  messages: IMessage[];
+  participants: string[];
 }
 
 export interface IMessage {

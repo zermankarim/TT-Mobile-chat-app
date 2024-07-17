@@ -1,13 +1,13 @@
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { IChat } from "../../shared/types";
+import { IChatClient } from "../../shared/types";
 
-const initialState: IChat[] = [];
+const initialState: IChatClient[] = [];
 
 const chatsSlice = createSlice({
   name: "chats",
   initialState,
   reducers: {
-    setChats: (state, action: PayloadAction<IChat[]>) => {
+    setChats: (state, action: PayloadAction<IChatClient[]>) => {
       state.splice(0, state.length, ...action.payload);
     },
   },

@@ -12,16 +12,12 @@ import {
   where,
 } from "firebase/firestore";
 import { database } from "../core/firebase/firebase";
-import { Ionicons } from "@expo/vector-icons";
-import BottomSheetComponent from "../shared/components/BottomSheet";
-import { useDispatch, useSelector } from "react-redux";
+import { useSelector } from "react-redux";
 import { RootState } from "../core/store/store";
-import { ChatScreenNavigationProp, IChat, IUserState } from "../shared/types";
-import { useNavigation } from "@react-navigation/native";
-import { setCurrentChat } from "../core/reducers/currentChat";
-import { Avatar, Button } from "@rneui/base";
+import { IUserState } from "../shared/types";
 import TextWithFont from "../shared/components/TextWithFont";
 import UserCardInSearch from "../shared/components/UserCardInSearch";
+import uuid from "react-native-uuid";
 
 const CreateChat: FC = () => {
   // Redux states and dispatch
@@ -30,6 +26,7 @@ const CreateChat: FC = () => {
   // States
   const [usersForChat, setUsersForChat] = useState<IUserState[]>([]);
   const [searchLoading, setSearchLoading] = useState<boolean>(true);
+  const [createChatLoading, setCreateChatLoading] = useState<boolean>(false);
   const [search, setSearch] = useState<string>("");
 
   //Functions
@@ -37,7 +34,7 @@ const CreateChat: FC = () => {
   const updateUsersForChatState = async (q: any) => {
     setSearchLoading(true);
     const unsubscribe = onSnapshot(q, async (snapshot: any) => {
-      const newUsers: IUserState[] = [];
+      const newUsersForChat: IUserState[] = [];
       for (const doc of snapshot.docs) {
         const userForChat: IUserState = doc.data() as IUserState;
         const q = query(
@@ -47,14 +44,17 @@ const CreateChat: FC = () => {
         const querySnapshot = await getDocs(q);
         const chatExists = querySnapshot.docs.some((chatDoc) => {
           const participants = chatDoc.data().participants;
-          return participants.includes(userForChat.uid);
+          return (
+            participants.length === 2 && participants.includes(userForChat.uid)
+          );
         });
-        // Push only users for creating new chat
+
+        // Push only users for creating new chat if a one-on-one chat doesn't exist
         if (!chatExists) {
-          newUsers.push(userForChat);
+          newUsersForChat.push(userForChat);
         }
       }
-      setUsersForChat(newUsers);
+      setUsersForChat(newUsersForChat);
       setSearchLoading(false);
     });
     return unsubscribe;
@@ -93,7 +93,7 @@ const CreateChat: FC = () => {
       setSearchLoading(false);
     } catch (error: any) {
       Alert.alert("Error during finding users: ", error.message);
-      console.log(error.message);
+      console.error(error.message);
       setSearchLoading(false);
     }
   };
@@ -125,7 +125,7 @@ const CreateChat: FC = () => {
         updateSearchFunction={updateSearchUsers}
         search={search}
       ></SearchBarComponent>
-      {searchLoading ? (
+      {searchLoading || createChatLoading ? (
         <ActivityIndicator
           size={"large"}
           color={palette.light[100]}
@@ -162,7 +162,9 @@ const CreateChat: FC = () => {
           {usersForChat.length ? (
             usersForChat.map((userForChat) => (
               <UserCardInSearch
+                key={uuid.v4().toLocaleString()}
                 userForChat={userForChat}
+                setCreateChatLoading={setCreateChatLoading}
               ></UserCardInSearch>
             ))
           ) : (
