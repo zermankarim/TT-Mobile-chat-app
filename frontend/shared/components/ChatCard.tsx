@@ -80,20 +80,6 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
     }
   }, []);
 
-  // Buttons list
-  const buttonsList: IButtonsList[] = [
-    {
-      title: "Remove chat",
-      icon: (
-        <MaterialCommunityIcons
-          name="chat-remove"
-          size={24}
-          color={palette.light[800]}
-        />
-      ),
-      onPress: () => handleRemoveChat(),
-    },
-  ];
 
   const { messages } = chat;
   return (
