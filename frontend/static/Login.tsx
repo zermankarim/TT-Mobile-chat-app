@@ -82,7 +82,7 @@ const Login: FC<RouteProps> = ({ navigation }) => {
         const userData: IUserState = userSnap.data() as IUserState;
         dispatch(loginUser(userData));
       } else {
-        console.log("No such document!");
+        console.error("No such document!");
       }
       setLoadingLogin(false);
     } catch (e: any) {
