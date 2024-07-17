@@ -30,6 +30,7 @@ const Home: FC<RouteProps> = () => {
   const [chatsLoading, setChatsLoading] = useState<boolean>(true);
   const [search, setSearch] = useState<string>("");
   const [searchLoading, setSearchLoading] = useState<boolean>(true);
+  const [selectedChats, setSelectedChats] = useState<IChatClient[]>([]);
 
   // Effects
   useEffect(() => {

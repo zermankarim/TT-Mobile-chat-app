@@ -1,23 +1,22 @@
 import { Avatar, Text } from "@rneui/base";
-import { FC, useEffect, useState } from "react";
+import { FC, memo, useCallback, useEffect, useState } from "react";
 import { TouchableOpacity, View } from "react-native";
 import { palette } from "../palette";
 import { useNavigation } from "@react-navigation/native";
-import { FontAwesome } from "@expo/vector-icons";
-import {
-  ChatScreenNavigationProp,
-  IButtonsList,
-  IChatClient,
-  IUserState,
-} from "../types";
+import { ChatScreenNavigationProp, IChatClient, IUserState } from "../types";
 import { useDispatch, useSelector } from "react-redux";
 import { RootState } from "../../core/store/store";
 import { setMessages } from "../../core/reducers/messages";
 import { setCurrentChat } from "../../core/reducers/currentChat";
-import { MaterialCommunityIcons } from "@expo/vector-icons";
 import { format, isThisWeek, isToday, parseISO } from "date-fns";
 import TextWithFont from "./TextWithFont";
 import { FontAwesome5 } from "@expo/vector-icons";
+import { Badge } from "@rneui/themed";
+import { Feather } from "@expo/vector-icons";
+import {
+  addToSelectedChats,
+  removeFromSelectedChats,
+} from "../../core/reducers/selectedChats";
 
 interface IChatCartProps {
   chat: IChatClient;
@@ -28,10 +27,12 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
 
   // Redux states and dispatch
   const user = useSelector((state: RootState) => state.user);
+  const selectedChats = useSelector((state: RootState) => state.selectedChats);
   const dispatch = useDispatch();
 
   const { participants } = chat;
   const [oneRecipient, setOneRecipient] = useState<IUserState | null>(null);
+  const [isSelectedChat, setIsSelectedChat] = useState<boolean>(false);
 
   // Functions
   const handleRemoveChat = async () => {
@@ -54,6 +55,13 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
     // } catch (e: any) {
     //   Alert.alert("Error during deleting a chat: ", e.message);
     // }
+  };
+
+  const handleSelectChat = () => {
+    setIsSelectedChat(!isSelectedChat);
+    !isSelectedChat
+      ? dispatch(addToSelectedChats(chat))
+      : dispatch(removeFromSelectedChats(chat));
   };
 
   const formatMessageDate = (isoString: string): string => {
@@ -80,15 +88,19 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
     }
   }, []);
 
-
   const { messages } = chat;
   return (
     <TouchableOpacity
       onPress={() => {
-        dispatch(setMessages(chat.messages));
-        dispatch(setCurrentChat(chat));
-        navigation.navigate("Chat");
+        if (selectedChats.length) {
+          handleSelectChat();
+        } else {
+          dispatch(setMessages(chat.messages));
+          dispatch(setCurrentChat(chat));
+          navigation.navigate("Chat");
+        }
       }}
+      onLongPress={handleSelectChat}
       style={{
         display: "flex",
         flexDirection: "row",
@@ -99,27 +111,48 @@ const ChatCard: FC<IChatCartProps> = ({ chat }) => {
         padding: 8,
       }}
     >
-      {oneRecipient ? (
-        <Avatar
-          size={48}
-          rounded
-          title={oneRecipient.firstName![0] + " " + oneRecipient.lastName![0]}
-          containerStyle={{
-            backgroundColor: palette.dark[100],
-            shadowColor: "#000",
-            shadowOffset: {
-              width: 0,
-              height: 6,
-            },
-            shadowOpacity: 0.39,
-            shadowRadius: 8.3,
+      <View>
+        {oneRecipient ? (
+          <Avatar
+            size={48}
+            rounded
+            title={oneRecipient.firstName![0] + " " + oneRecipient.lastName![0]}
+            containerStyle={{
+              backgroundColor: palette.dark[100],
+              shadowColor: "#000",
+              shadowOffset: {
+                width: 0,
+                height: 6,
+              },
+              shadowOpacity: 0.39,
+              shadowRadius: 8.3,
 
-            elevation: 13,
-          }}
-        ></Avatar>
-      ) : (
-        <FontAwesome5 name="users" size={38} color={palette.light[600]} />
-      )}
+              elevation: 13,
+            }}
+          ></Avatar>
+        ) : (
+          <FontAwesome5 name="users" size={38} color={palette.light[600]} />
+        )}
+        {isSelectedChat ? (
+          <Badge
+            status="success"
+            value={
+              <Feather name="check" size={12} color={palette.light[600]} />
+            }
+            containerStyle={{
+              position: "absolute",
+              bottom: -4,
+              right: -4,
+            }}
+            badgeStyle={{
+              width: 15,
+              height: 15,
+              borderRadius: 10,
+            }}
+          />
+        ) : null}
+      </View>
+
       <View // Container for email and message
         style={{
           display: "flex",

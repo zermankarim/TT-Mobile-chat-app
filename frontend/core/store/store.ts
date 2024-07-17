@@ -3,6 +3,7 @@ import user from "../reducers/user";
 import messages from "../reducers/messages";
 import chats from "../reducers/chats";
 import currentChat from "../reducers/currentChat";
+import selectedChats from "../reducers/selectedChats";
 
 export const store = configureStore({
   reducer: {
@@ -10,6 +11,7 @@ export const store = configureStore({
     messages: messages,
     chats: chats,
     currentChat: currentChat,
+    selectedChats: selectedChats,
   },
 });
 
