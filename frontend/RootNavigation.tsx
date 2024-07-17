@@ -13,7 +13,6 @@ import { logoutUser } from "./core/reducers/user";
 import {
   CreateChatScreenNavigationProp,
   IButtonsList,
-  IChat,
   IUserState,
   ProfileScreenNavigationProp,
   RootStackParamList,
@@ -42,13 +41,7 @@ const RootNavigation: FC = () => {
   >();
   // Redux states and dispatch
   const user: IUserState = useSelector((state: RootState) => state.user);
-  // const { sender }: IChat = useSelector(
-  //   (state: RootState) => state.currentChat
-  // );
   const dispatch = useDispatch();
-
-  // States
-  // const [loading, setLoading] = useState<boolean>(false);
 
   // Functions
   const handleLogoutBtnPress = () => {
