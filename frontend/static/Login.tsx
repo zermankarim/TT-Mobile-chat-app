@@ -13,15 +13,7 @@ import { loginUser } from "../core/reducers/user";
 import { auth, database } from "../core/firebase/firebase";
 import { IUserState, RouteProps } from "../shared/types";
 import { palette } from "../shared/palette";
-import {
-  and,
-  collection,
-  doc,
-  getDoc,
-  getDocs,
-  query,
-  where,
-} from "firebase/firestore";
+import { doc, getDoc } from "firebase/firestore";
 import TextWithFont from "../shared/components/TextWithFont";
 import { signInWithEmailAndPassword } from "firebase/auth";
 
